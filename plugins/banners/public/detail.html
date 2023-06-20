@@ -1,0 +1,490 @@
+<style>
+	.CLASS header { text-align: center; }
+	.CLASS header label { position: relative; }
+	.CLASS header label .size { color: gray; margin-left: 15px; font-size: 14px; font-weight: normal; }
+	.CLASS .maxwidth { max-width: 1200px; margin: 0 auto; }
+	.CLASS .stats-container { border-bottom: 1px solid #e0e0e0; }
+	.CLASS .panel > label { padding: 10px 15px !important; }
+
+	.CLASS .campaigns .listing { font-size: 12px; }
+	.CLASS .campaigns .listing section { padding: 7px 0 0; height: 34px; }
+	.CLASS .campaigns figure section { color: #a0a0a0; }
+	.CLASS .campaigns .id { font-family: Menlo, Consolas, monospace; font-size: 11px; margin-right: 5px; color: #A0A0A0; }
+	.CLASS .campaigns .status { width: 166px; float: left; border-right: 1px solid #E0E0E0; margin-right: 10px; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; color: #000; }
+	.CLASS .campaigns .active { color: #000; }
+	.CLASS .campaigns .active .status { color: var(--color); }
+	.CLASS .campaigns .stats { width: 86px; text-align: right; float: right; border-left: 1px solid #e0e0e0; font-size: 11px; margin-top: 3px; padding-left: 10px; }
+	.CLASS .campaigns .stats span { margin-right: 10px; }
+	.CLASS .campaigns .date { font-size: 11px; border-left: 1px solid #e0e0e0; padding-left: 10px; margin-left: 10px; line-height: 21px; /* width: 100px; */float: right; color: #777; margin-right: 10px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: right; }
+	.CLASS .campaigns .name { line-height: 21px; float: left; }
+	.CLASS .campaigns .name > span { margin-right: 5px; display: inline-block; max-width: 650px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+	.CLASS .campaigns .options { float: right; margin-top: 2px; padding-left: 10px; border-left: 1px solid #e0e0e0; }
+	.CLASS .campaigns .prediction { float: right; font-size: 11px; margin-top: 3px; margin-left: 10px; padding-left: 10px; border-left: 1px solid #e0e0e0; width: 160px; }
+	.CLASS .campaigns .customer { float: right; margin-top: 3px; padding-right: 10px; }
+
+	.CLASS .keyvalues .keyvalue { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; font-size: 12px; border-bottom: 1px solid #f0f0f0; }
+	.CLASS .keyvalues .keyvalue:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+	.CLASS .keyvalues .keyvalue .value { color: gray; }
+	.CLASS .keyvalues .keyvalue .key { margin-left: 0; }
+	.CLASS .keyvalues .keyvalue.nbb { border-bottom: 0 !important; margin-bottom: 0 !important; }
+
+	.CLASS .bannerbtn { border: 0; font-weight: bold; font-size: 12px; background-color: var(--color); border-radius: var(--radius); width: 100%; transition: opacity .2s;  color: #fff; padding: 5px 15px; }
+	.CLASS .bannerbtn:hover { opacity: .85; }
+
+	.CLASS .toggler .switch { position: relative; display: inline-block; width: 34px; height: 19px; float: right; }
+	.CLASS .toggler .switch input { opacity: 0; width: 0; height: 0; }
+	.CLASS .toggler .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e0e0e0; transition: .2s; }
+	.CLASS .toggler .slider:before { position: absolute; content: ""; height: 13px; width: 13px; left: 4px; bottom: 3px; background-color: white; transition: .2s; }
+	.CLASS .toggler input:checked + .slider { background-color: #68B25B; }
+	.CLASS .toggler input:focus + .slider { box-shadow: 0 0 1px #68B25B; }
+	.CLASS .toggler input:checked + .slider:before { transform: translateX(13px); }
+	.CLASS .toggler .slider.round { border-radius: 34px; }
+	.CLASS .toggler .slider.round:before { border-radius: 50%; }
+
+	.CLASS .ui-pagination { margin-top: 0 !important; padding: 14px 15px !important; height: 55px !important; border-top: 1px solid #e0e0e0 !important; }
+	.CLASS .ui-pagination nav { overflow: hidden; }
+
+	.CLASS .search { max-width: 250px; width: 100%; }
+
+	@media(max-width: 991px) {
+		.CLASS .panels .panel { margin-bottom: 20px; }
+		.CLASS .panels .panel:last-child { margin-bottom: 0; }
+	}
+
+	@media(max-width: 768px) {
+		.CLASS .toolbar button { min-width: 40px !important; }
+		.CLASS .toolbar button i { margin-right: 0 !important; }
+		.CLASS header label .size { font-size: 11px; }
+		.CLASS .listing figure section { position: relative; height: 50px !important; }
+		.CLASS .campaigns .status { width: 30px; }
+		.CLASS .campaigns .date { position: absolute; bottom: 2px; left: 25px; border-left: 0; }
+		.CLASS .campaigns .options { border-left: 0; }
+		.CLASS .ui-pagination { padding: 0 !important; }
+		.CLASS .search { max-width: 100%; }
+	}
+</style>
+
+<ui-plugin config="aclass:1">
+
+	<header>
+		<a href="../" class="back jR"><i class="ti ti-angle-left"></i></a>
+		<label>
+			<ui-bind path="?.data.icon" config="template" class="hidden-sm">
+				<script type="text/html">
+					<i class="{{ value }}"></i>
+				</script>
+			</ui-bind>
+			<ui-bind path="?.data.name" config="text"></ui-bind>
+			<ui-bind path="?.data.size" config="text" class="size hidden-sm"></ui-bind>
+			<ui-bind path="?.data.isdisabled" config="show" style="margin-left:15px" class="hidden-sm">
+				<div class="badge badge-medium badge-red">@(Disabled)</div>
+			</ui-bind>
+		</label>
+
+		<div class="toolbar">
+			<button class="exec" data-exec="?/refresh"><i class="ti ti-refresh"></i><span class="hidden-sm">@(Refresh)</span></button>
+			<button class="exec" data-exec="?/updatebanner"><i class="ti ti-pencil"></i><span class="hidden-sm">@(Update)</span></button>
+			<button class="exec" data-exec="?/create"><i class="ti ti-plus-circle"></i><span class="hidden-sm">@(Create)</span></button>
+		</div>
+	</header>
+	<ui-component name="viewbox" path="common.page" config="parent:window;scrollbar:1;scrollbarshadow:1;margin:115;marginxs:130">
+		<div class="padding bg-smoke stats-container">
+			<div class="panels grid-3 grid-sm-1 grid-xs-1">
+				<div class="panel">
+					<label><i class="ti ti-chart-bar mr5"></i>@(Weekly stats)</label>
+					<div class="padding">
+						<ui-component name="stats7" path="?.data.stats" config="height:80;firstday:1;border:0" style="margin-top:6px"></ui-component>
+					</div>
+				</div>
+				<div class="panel">
+					<label><i class="ti ti-eye mr5"></i>@(Views)</label>
+					<div class="padding">
+						<div class="keyvalues">
+							<div class="keyvalue">
+								<div class="key">@(Today views)</div>
+								<ui-bind path="?.data.visitors" config="text" class="value"></ui-bind>
+							</div>
+							<div class="keyvalue">
+								<div class="key">@(All views)</div>
+								<ui-bind path="?.data.allviews" config="text" class="value"></ui-bind>
+							</div>
+							<div class="keyvalue">
+								<div class="key">@(Average daily traffic) <span class="gray">(@(last week))</span></div>
+								<ui-bind path="?.data.averageviews" config="text" class="value"></ui-bind>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="panel">
+					<label><i class="ti ti-rocket mr5"></i>@(Actions)</label>
+					<div class="padding">
+						<div class="keyvalues">
+							<div class="keyvalue">
+								<div class="key">
+									<ui-bind path="?.data.isdisabled" config="template">
+										<script type="text/html">
+											{{ if value }}@(Banner is disabled){{ else }}@(Banner is enabled){{ fi }}
+										</script>
+									</ui-bind>
+								</div>
+								<ui-bind path="?.data.isdisabled" config="checked:value===false" child="input">
+									<div class="toggler">
+										<label class="switch">
+												<input type="checkbox" class="exec" data-exec="?/toggle">
+											<span class="slider round"></span>
+										</label>
+									</div>
+								</ui-bind>
+							</div>
+							<div class="keyvalue nbb">
+								<div class="key">
+									@(Active campaigns)
+								</div>
+								<ui-bind path="?.data.campaigns" config="text" class="value"></ui-bind>
+							</div>
+							<button class="exec bannerbtn" data-exec="?/intro">@(Set up a banner on your website)</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<ui-bind path="?.items" config="show">
+			<div class="padding npb">
+				<div class="search">
+					<ui-component name="searchinput" path="?.search" config="autofocus:1;placeholder:@(Search)"></ui-component>
+				</div>
+			</div>
+		</ui-bind>
+
+		<ui-component name="empty" path="?.items.items" config="parent:.ui-scrollbar-area;margin:255;icon:ti ti-check-circle green">
+			<script type="text/html">
+				<div>@(You don't have any campaigns.)</div>
+				<div class="mt5">
+					<span class="link exec" data-exec="?/create"><i class="ti ti-plus-circle green mr5"></i>@(Create)</span>
+				</div>
+			</script>
+
+			<div class="padding campaigns">
+				<ui-bind path="?.items.items" config="template:figure" class="listing block">
+					<script type="text/html">
+						{{ foreach m in value }}
+							<figure class="exec" data-exec="?/detail" data-id="{{ m.id }}">
+								<section class="{{ if !m.iscompleted }}active{{ fi }}">
+									<div class="status">{{ m.iscompleted | status(m.isdisabled) }}</div>
+									<div class="name">
+										<span class="exec" data-exec="?/preview" title="@(Preview)" data-id="preview" data-prevent="true"><i class="ti ti-image mr5 hidden-sm"></i></span>
+										<span>{{ if m.isdisabled && m.iscompleted }}<div class="badge badge-small badge-red mr5">@(Disabled)</div>{{ fi }}{{ m.name }}</span>
+									</div>
+
+									<div class="options">
+										<i class="ti ti-cog exec" data-exec="?/options" data-prevent="true"></i>
+									</div>
+									<div class="date">
+										<span title="@(Campaign start date)"><i class="ti ti-clock mr5"></i>{{ m.dtbeg | format('dd.MM.yyyy') }}</span>
+										<span> - </span>
+										<span>{{ if m.dtend }}<span title="@(Campaign end date)">{{ m.dtend | format('dd.MM.yyyy')}}</span>{{ else }}<span title="@(Campaign end)">{{ m.count }} {{ m.limit }}</span>{{ fi }}</span>
+									</div>
+									<div class="prediction hidden-sm">
+										<span class="mr5">@(Prediction:)</span>
+										<span>{{ m.prediction }}</span>
+									</div>
+									<div class="stats hidden-sm">
+										<span title="@(Campaign views)"><i class="ti ti-eye mr5"></i>{{ m.views }}</span>
+										<span title="@(Campaign clicks)"><i class="ti ti-pointer mr5"></i>{{ m.clicks }}</span>
+									</div>
+									<div class="customer hidden-sm">
+										{{ if m.customer }}<span class="badge badge-small badge-silver ml5" title="@(Customer)">{{ m.customer }}</span>{{ fi }}
+									</div>
+								</section>
+							</figure>
+						{{ end }}
+					</script>
+				</ui-bind>
+			</div>
+		</ui-component>
+	</ui-component>
+
+	<ui-component name="pagination" path="?.items" config="exec:?/pagination;pages:# pages,# page,# pages,# pages;items:# items,# item,# items,# items"></ui-component>
+
+	<ui-component name="intro" path="showintro" config="if:advert;width:700" class="hidden">
+		<figure>
+			<div class="padding">
+				<i class="ti ti-code m"></i>
+				<div class="m">@(Place this script at the bottom of your website. <br/>Only once.)</div>
+				<code>
+					<ui-bind path="?.data.scr" config="text" class="exec copy block" data-exec="?/copy"></ui-bind>
+				</code>
+			</div>
+		</figure>
+		<figure>
+			<div class="padding">
+				<i class="ti ti-pin-alt m"></i>
+				<div class="m">@(Place this tag where you want the advert to appear on your website. <br/>You can add multiple views.)</div>
+				<code>
+					<ui-bind path="?.data.container" config="text" class="exec copy block" data-exec="?/copy"></ui-bind>
+				</code>
+			</div>
+		</figure>
+	</ui-component>
+
+	<div class="floatingbox" data-id="preview">
+		<ui-bind path="?.preview" config="src:value" child="img">
+			<img alt="" class="img-responsive" style="max-height:400px"/>
+		</ui-bind>
+	</div>
+</ui-plugin>
+
+<ui-component name="importer" path="common.form" config="if:formcampaign;url:@{#}/~ID~/forms/campaign.html"></ui-component>
+
+<script>
+	PLUGIN(function(exports) {
+
+		exports.reload = function() {
+			var params = NAV.params;
+			exports.set('id', params[0]);
+			exports.refresh();
+		};
+
+		exports.refresh = function(el) {
+			el && el.find('i').aclass('ti-spin').rclass('ti-spin', 1000);
+			exports.filter();
+		};
+
+		exports.filter = function(page) {
+			var id = NAV.params[0];
+			var model = exports.model;
+			var filter = {};
+			var search = model.search;
+
+			filter.page = typeof(page) === 'number' ? page : 1;
+			filter.q = search;
+
+			exports.tapi(QUERIFY('campaigns/{0}'.format(id), filter) + '  ERROR @hideloading', function(response) {
+				if (!(response instanceof Array)) {
+					for (var item of response.items) {
+						item.averageviews = model.data.averageviews;
+						item.campaigns = 2;
+						item.prediction = FUNC.prediction(item);
+					}
+				}
+				exports.set('items', response);
+			});
+
+			exports.bannerdata();
+		};
+
+		exports.bannerdata = function() {
+			var id = NAV.params[0];
+			exports.tapi('banners_read/{0} ERROR'.format(id), function(response) {
+
+				var all = response.stats.reduce(function(a, b) {
+					return a + b;
+				}, 0);
+
+				var averageviews = Math.round(all / 7);
+
+				response.allviews = all;
+				response.averageviews = averageviews;
+				exports.set('data', response);
+				exports.bannersetup();
+			});
+		};
+
+		exports.updatebanner = function(el) {
+			var model = exports.model;
+			exports.tapi('banners_read/{0}'.format(model.id), function(response) {
+				var size = response.size.split('x');
+				response.size = model.size;
+				response.width = +size[0];
+				response.height = +size[1];
+				SET('formbanner', response);
+				SET('common.form', 'formbanner');
+			});
+		};
+
+		exports.create = function() {
+			var model = exports.model.data;
+			var data = {};
+			var size = model.size.split('x');
+			data.url = 'https://';
+			data.bannerid = model.id;
+			data.userid = model.userid;
+			data.size = model.size;
+			data.dtbeg = NOW;
+			data.dtend = NOW.add('1 week');
+			data.limit = 'views';
+			data.count = 1000;
+			data.width = +size[0];
+			data.height = +size[1];
+			data.averageviews = model.averageviews;
+			data.campaigns = 2;
+			data.clicks = 0;
+
+			SET('formcampaign @default', data);
+			SET('common.form', 'formcampaign');
+		};
+
+		exports.detail = function(el) {
+			var model = exports.model.data;
+			var id = ATTRD(el);
+			var size = model.size.split('x');
+
+			exports.tapi('campaigns_read/{0} ERROR'.format(id), function(response) {
+				response.size = model.size;
+				response.width = +size[0];
+				response.height = +size[1];
+				response.averagereviews = model.averagereviews;
+				response.campaigns = model.campaigns;
+				SET('formcampaign @default', response);
+				SET('common.form', 'formcampaign');
+			});
+		};
+
+		exports.preview = function(el) {
+			var items = exports.model.items.items;
+			var id = el.closest('figure').attrd('id');
+			var img = items.findItem('id', id).photo;
+			exports.set('preview', img);
+
+			var opt = {};
+			opt.element = el;
+			opt.id = el.attrd('id');
+			SETTER('floatingbox/show', opt);
+		};
+
+		exports.pagination = function(page, el) {
+			exports.filter(page);
+		};
+
+		exports.bannersetup = function() {
+			var model = exports.model.data;
+
+			model.container = '<div class="x" data-id="' + model.id + '"></div>';
+			model.scr = '<scr' + 'ipt src="' + location.origin + '/x.min.js" async defer></scr'+'ipt>';
+			exports.upd('?.data');
+		};
+
+		exports.copy = function(el) {
+			el.css('background-color', '#e0e0e0');
+			setTimeout(function() {
+				el.css('background-color', '#f8f8f8');
+				EXEC('-notify/success @hideloading', '@(Copied to clipboard.)');
+			}, 200);
+
+			SETTER('clipboard/copy', el.text());
+		};
+
+		exports.options = function(el) {
+			var id = ATTRD(el);
+			var ads = exports.model.items.items;
+			var item = ads.findItem('id', id);
+			var opt = {};
+			opt.element = el;
+			opt.items = [];
+			opt.items.push({ name: item.isdisabled ? '@(Start)' : '@(Pause)', value: 'disable', icon: item.isdisabled ? 'ti ti-play-alt green' : 'ti ti-pause orange' });
+			opt.items.push({ name: '@(Reset)', value: 'reset', icon: 'ti ti-sync' });
+			opt.items.push('-');
+			opt.items.push({ name: '@(Remove)', value: 'remove', icon: 'ti ti-trash red', classname: 'b' });
+			opt.align = 'right';
+			opt.callback = function(selected) {
+				switch (selected.value) {
+					case 'disable':
+						exports.disable(id, el);
+						break;
+					case 'reset':
+						exports.resetstats(id);
+						break;
+					case 'remove':
+						exports.remove(id);
+						break;
+				}
+			};
+
+			SETTER('menu/show', opt);
+		};
+
+		exports.disable = function(id, el) {
+			exports.tapi('campaigns_disable/{0} @showloading ERROR'.format(id), function() {
+				exports.refresh();
+				EXEC('-notify/success @hideloading', '@(The campaign has been disabled.)');
+			});
+		};
+
+		exports.resetstats = function(id) {
+			EXEC('-approve/show', '@(Are you sure you want to reset campaign stats?)', '"ti ti-trash" @(Reset)', function() {
+				exports.tapi('campaigns_reset/{0} @showloading ERROR'.format(id), function() {
+					exports.refresh();
+					EXEC('-notify/success @hideloading', '@(The campaign has been reseted successfully.)');
+				});
+			});
+		};
+
+		exports.remove = function(id) {
+			EXEC('-approve/show', '@(Are you sure you want to remove selected capaign?)', '"ti ti-trash" @(Remove)', function() {
+				exports.tapi('campaigns_remove/{0} @showloading ERROR'.format(id), function() {
+					exports.refresh();
+					EXEC('-notify/success @hideloading', '@(The campaign has been removed successfully.)');
+				});
+			});
+		};
+
+		exports.toggle = function() {
+			var model = exports.model.data;
+
+			if (model.isdisabled === true)
+				model.isdisabled = false;
+			else
+				model.isdisabled = true;
+
+			exports.tapi('banners_disable/{0} ERROR'.format(model.id), function() {
+				exports.upd('data.isdisabled');
+				EXEC('-notify/success @hideloading', model.isdisabled ? '@(The banner has been disabled)' : '@(The banner has been enabled)');
+			});
+		};
+
+		exports.intro = function() {
+			SET('showintro', 'advert');
+		};
+
+		exports.watch('search', function(value) {
+			setTimeout(() => exports.refresh(), 150);
+		});
+
+	});
+
+	Thelpers.status = function(value, isdisabled) {
+		var status = '';
+
+		if (value) {
+			status = '<div style="color:#A0A0A0"><i class="ti ti-check-circle mr5" style="color:#A0A0A0"></i><span class="hidden-sm">@(Campaign is completed)</span></div>';
+		} else {
+			if (isdisabled)
+				status = '<div style="color:orange"><i class="ti ti-pause mr5" style="color:orange"></i><span class="hidden-sm">@(Campaign is paused)</span></div>';
+			else
+				status = '<div><i class="ti ti-circle-notch ti-spin mr5" style="color:#4285F4"></i><span class="hidden-sm">@(Campaign is active)</span></div>';
+		}
+
+		return status;
+	};
+
+	FUNC.prediction = function(model) {
+		if (model.limit === 'date') {
+			if (!model.averagereviews)
+				return DEF.empty;
+			var duration = Math.abs(model.dtend - model.dtbeg);
+			var allviews = Math.ceil(duration / (1000 * 60 * 60 * 24)) * model.averageviews;
+			return Math.ceil(allviews / model.campaigns).pluralize('@(# views,# view,# views,# views)');
+		} else if (model.limit === 'views') {
+			if (!model.averagereviews)
+				return DEF.empty;
+			var days = Math.ceil(model.count / model.averageviews);
+			var dtbeg = Math.abs(model.dtbeg);
+			var date = (dtbeg + (days * (1000 * 60 * 60 * 24))).parseDate().format('dd.MM.yyyy');
+			return days.pluralize('@(# days,# day,# days,# days)') + ' / ' + date;
+		}
+
+		return (model.count - model.clicks).pluralize('@(# clicks,# click,# clicks,# clicks)');
+	};
+
+</script>

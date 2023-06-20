@@ -1,0 +1,150 @@
+<style>
+	.CLASS .listing2 { column-gap: 7px; }
+	.CLASS .listing2 figure { margin-bottom: 7px; }
+	.CLASS .listing2 figure:hover { filter:brightness(0.9); }
+	.CLASS .listing2 figure > section { height: 82px; }
+	.CLASS .controls { margin-left: 15px; border-left: 1px solid rgba(0,0,0,0.1); padding: 0 8px 0 15px; height: 100%; display: flex; align-items: center; }
+	.CLASS .listing2 .icon { display: flex; align-items: center; justify-content: center; flex-direction: column; border-right: 1px solid rgba(0,0,0,0.1); margin-right: 15px; padding: 0 15px 0 8px; text-align: center; float: left; height: 100%; font-size: 20px; }
+	.CLASS .listing2 .name { padding-right: 15px; margin-bottom: 3px; }
+	.CLASS .search { max-width: 250px; width: 100%; }
+
+	.CLASS .listing2 .badge { display: flex; justify-content: space-between; }
+
+	@media(max-width: 768px) {
+		.CLASS .search { max-width: 100%; }
+	}
+</style>
+
+<ui-plugin config="aclass:1">
+
+	<header>
+		<label><i class="ti ti-game-board-alt"></i>@(Banners)</label>
+		<div class="toolbar">
+			<button class="exec" data-exec="?/refresh"><i class="ti ti-refresh"></i>@(Refresh)</button>
+			<button class="exec b" data-exec="?/create"><i class="ti ti-plus-circle"></i>@(Create)</button>
+		</div>
+	</header>
+
+	<ui-component name="viewbox" config="parent:auto;margin:60" class="invisible">
+		<div>
+			<div class="padding">
+
+				<ui-bind path="?.items" config="show">
+					<div class="m">
+						<div class="search">
+							<ui-component name="searchinput" path="?.search" config="autofocus:1;placeholder:@(Search)"></ui-component>
+						</div>
+					</div>
+				</ui-bind>
+
+				<ui-component name="empty" path="?.items" config="parent:.ui-scrollbar-area">
+
+					<script type="text/html">
+						<div>@(You don't have any banners)</div>
+						<div class="mt5">
+							<span class="link exec" data-exec="?/create"><i class="ti ti-plus-circle green mr5"></i>@(Create first)</span>
+						</div>
+					</script>
+
+					<div>
+						<div style="height:5px"></div>
+						<ui-component name="search" path="?.search" config="selector:figure;datasource:?.list">
+							<ui-bind path="?.items" config="template:figure" class="grid-4 grid-md-2 grid-sm-2 grid-xs-1 listing2">
+								<script type="text/html">
+									{{ foreach m in value }}
+										<figure class="exec{{ if m.isdisabled }} disabled{{ fi }}" data-exec="?/detail" data-id="{{ m.id }}" data-search="{{ m.name }}">
+											<section>
+												<div class="pull-right controls exec" data-exec="?/options" data-prevent="true">
+													<span><i class="ti ti-ellipsis-h"></i></span>
+												</div>
+												<div class="icon">
+													<i class="{{ m.icon }}"></i>
+													<div class="fs12 gray mt5" title="@(Banner size in px)">{{ m.size }}</div>
+												</div>
+												<div class="name hellip" title="{{ m.name }}">{{ m.name }}</div>
+												<div><span class="badge badge-medium {{ if m.campaigns === 0 }}badge-red{{ else }}badge-green{{ fi }}" style="margin-bottom:5px">@(Active campaigns:) <b>{{ m.campaigns | empty('0') }}</b></span></div>
+												<div><span class="badge badge-medium {{ if m.visitors === 0 }}badge-red{{ else }}badge-blue{{ fi }}">@(Today views:) <b>{{ m.visitors | empty('0') }}</b></span></div>
+											</section>
+										</figure>
+									{{ end }}
+								</script>
+							</ui-bind>
+						</ui-component>
+					</div>
+
+				</ui-component>
+			</div>
+		</div>
+
+	</ui-component>
+
+</ui-plugin>
+
+<script>
+
+	PLUGIN(function(exports) {
+
+		exports.reload = function() {
+			exports.refresh();
+		};
+
+		exports.refresh = function(el) {
+			el && el.find('i').aclass('ti-spin').rclass('ti-spin', 1000);
+			exports.tapi('banners ERROR', 'items');
+		};
+
+		exports.create = function() {
+			SET('common.form', 'formbanner')
+		};
+
+		exports.detail = function(el) {
+			var id = ATTRD(el);
+			REDIRECT('/setup/banners/{0}/'.format(id));
+		};
+
+		exports.options = function(el) {
+			var id = el.closest('figure').attrd('id');
+			var opt = {};
+			opt.offsetY = -24;
+			opt.offsetX = -6;
+			opt.element = el;
+			opt.items = [];
+			opt.items.push({ name: '@(Update)', value: 'update', icon: 'ti ti-pencil-alt' });
+			opt.items.push('-');
+			opt.items.push({ name: '@(Remove)', value: 'remove', icon: 'ti ti-trash red' });
+			opt.align = 'right';
+			opt.callback = function(selected) {
+				switch (selected.value) {
+					case 'update':
+						exports.update(id);
+						break;
+					case 'remove':
+						exports.remove(id);
+						break;
+				}
+			};
+
+			SETTER('menu/show', opt);
+		};
+
+		exports.update = function(id) {
+			exports.tapi('banners_read/{0} @showloading'.format(id), function(response) {
+				var size = response.size.split('x');
+				response.width = +size[0];
+				response.height = +size[1];
+				SET('formbanner', response);
+				SET('common.form @hideloading', 'formbanner');
+			});
+		};
+
+		exports.remove = function(id) {
+			EXEC('-approve/show', '@(Are you sure you want to remove selected banner?)', '"ti ti-trash" @(Remove)', function() {
+				exports.tapi('banners_remove/{0} @showloading ERROR'.format(id), function() {
+					exports.refresh();
+					EXEC('-notify/success @hideloading', '@(The banner has been removed successfully.)');
+				});
+			});
+		};
+	});
+
+</script>

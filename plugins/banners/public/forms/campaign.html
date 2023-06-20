@@ -1,0 +1,110 @@
+<style>
+	.CLASS .upload-photo-container { margin: 0 auto; max-width: 100%; }
+	.CLASS .upload-photo-container img { margin: 0 auto; }
+	.CLASS .prediction { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background-color: var(--color); border-radius: var(--radius); color: #fff; }
+</style>
+
+<ui-component name="box" path="common.form" config="if:~PATH~;icon:ti ti-game-board-alt;autofocus:1;reload:?/reload;closeesc:1;scrollbar:1;submit:?/submit;width:760" class="hidden ~PATH~" plugin="~PATH~">
+	<div class="padding bg-smoke">
+		<br />
+		<div class="upload-photo-container">
+			<ui-component name="preview" path="?.photo" config="=width:?.width;=height:?.height;keeporiginal:1;url:/api/upload/;output:file;map:value.url"></ui-component>
+			<div class="help center">@(By click on the square you can upload the image) (<ui-bind path="?.size" config="html"></ui-bind>)</div>
+		</div>
+		<br />
+	</div>
+
+	<div class="padding npb">
+
+		<ui-component name="input" path="?.name" config="required:1;placeholder:@(Enter advert name)" class="m">@(Name)</ui-component>
+		<ui-component name="input" path="?.url" config="required:1" default="'https://'" class="m">@(URL address)</ui-component>
+
+		<div class="row">
+			<div class="col-sm-6 m">
+				<ui-component name="input" path="?.customer" config="placeholder:@(Total Avengers)">@(Customer)</ui-component>
+			</div>
+			<div class="col-sm-6 m">
+				<ui-component name="input" path="?.note">@(Note)</ui-component>
+			</div>
+		</div>
+	</div>
+
+	<hr class="nmt"/>
+
+	<div class="padding npt">
+		<div class="prediction dflex">
+			<div>
+				<i class="fas fa-chart-line mr5"></i>
+				<span class="mr5 b">@(Prediction)</span>
+				<ui-bind path="?.limit" config="template" class="fs12" style="color:#F0F0F0">
+					{{ if value === 'clicks' }}
+					(@(Remaining clicks))
+					{{ else if value === 'date' }}
+					(@(Determines how many impressions you can achieve in the selected time period))
+					{{ else if value === 'views' }}
+					(@(Determines count of days of running))
+					{{ fi }}
+				</ui-bind>
+			</div>
+			<ui-bind path="?.limit" config="show">
+				<ui-bind path="?.prediction" config="text" class="b"></ui-bind>
+			</ui-bind>
+		</div>
+	</div>
+
+	<div class="padding npt">
+		<div class="row">
+			<div class="col-sm-4">
+				<ui-component name="input" path="?.dtbeg" config="required:1;type:date" default="NOW" class="m">@(Begin)</ui-component>
+			</div>
+			<div class="col-sm-4">
+				<ui-component name="input" path="?.limit" config="required:1;dirsource:CAMPAIGN_TYPES" class="m">@(Limit)</ui-component>
+			</div>
+			<ui-bind path="?.limit" config="show:value==='date'" class="col-sm-4">
+				<ui-component name="input" path="?.dtend" config="required:1;type:date" class="m">@(End)</ui-component>
+			</ui-bind>
+			<ui-bind path="?.limit" config="show:value!=='date'" class="col-sm-4">
+				<ui-component name="input" path="?.count" config="required:1;type:number" class="m">@(Count)</ui-component>
+			</ui-bind>
+		</div>
+		<ui-component name="input" path="?.ignore" config="transform:lowercase" default="''">@(Ignore list)</ui-component>
+		<div class="help">@(Separate words by a comma. The system searches terms in the website URL, and if the word is matched, it skips the website advert.)</div>
+	</div>
+
+	<nav>
+		<ui-component name="validate" path="?">
+			<button name="submit" disabled><i class="ti ti-check-circle"></i>@(SUBMIT)</button>
+			<button name="cancel">@(Cancel)</button>
+		</ui-component>
+	</nav>
+</ui-component>
+
+<script>
+
+	var CAMPAIGN_TYPES = [{ id: 'views', name: '@(Views)' }, { id: 'clicks', name: '@(Clicks)' }, { id: 'date', name: '@(Date)' }];
+
+	PLUGIN(function(exports) {
+
+		exports.reload = function(com) {
+			var model = exports.form;
+			var id = model ? model.id : null;
+			com.reconfigure({ title: id ? '@(Update campaign)' : '@(Create campaign)' });
+			exports.set('prediction', FUNC.prediction(model));
+		};
+
+		exports.submit = function(hide) {
+			var model = exports.form;
+			exports.tapi('campaigns_save @showloading ERROR', model, function() {
+				exports.caller.exec('refresh @hideloading');
+				hide();
+			});
+		};
+
+		exports.watch('?.dtbeg + ?.dtend + ?.limit + ?.count', function(value, path, type) {
+			var model = exports.model;
+			exports.set('prediction', FUNC.prediction(model));
+		});
+
+	});
+
+</script>

@@ -1,0 +1,59 @@
+<ui-component name="miniform" path="common.form" config="if:~PATH~;icon:ti ti-game-board-alt;autofocus:1;reload:?/reload;closeesc:1;scrollbar:0;submit:?/submit;width:500" class="hidden ~PATH~" plugin="~PATH~">
+	<div>
+		<div class="padding">
+			<ui-component name="input" path="?.name" config="required:1;maxlength:80" default="''">@(Name)</ui-component>
+		</div>
+		<div class="padding npb bg-smoke">
+			<div class="row">
+				<div class="col-xs-6 m">
+					<ui-component name="input" path="?.device" config="dirsource:all|@(All devices),desktop|@(Desktop devices),mobile|@(Mobile devices)" default="'all'">@(Target device)</ui-component>
+				</div>
+				<div class="col-xs-6 m">
+					<ui-component name="input" path="?.icon" config="type:icon" default="'ti ti-game-board-alt'">@(Icon)</ui-component>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-6 m">
+					<ui-component name="input" path="?.width" config="type:number;required:1" default="300">@(Width)</ui-component>
+				</div>
+				<div class="col-xs-6 m">
+					<ui-component name="input" path="?.height" config="type:number;required:1" default="300">@(Height)</ui-component>
+				</div>
+			</div>
+		</div>
+		<div class="padding">
+			<ui-component name="input" path="?.isdisabled" config="type:checkbox" class="b">@(Disable banner)</ui-component>
+			<ui-component name="input" path="?.roundedcorners" config="type:checkbox" default="true">@(Round corners on the banner)</ui-component>
+		</div>
+	</div>
+	<nav>
+		<ui-component name="validate" path="?">
+			<button name="submit" disabled><i class="ti ti-check-circle"></i>@(SUBMIT)</button>
+			<button name="cancel">@(Cancel)</button>
+		</ui-component>
+	</nav>
+</ui-component>
+
+<script>
+
+	PLUGIN(function(exports) {
+
+		exports.reload = function(com) {
+			var model = exports.model;
+			var id = model ? model.id : null;
+			com.reconfigure({ title: id ? '@(Update banner)' : '@(Create banner)' });
+		};
+
+		exports.submit = function(hide) {
+			var model = exports.form;
+			model.size = model.width + 'x' + model.height;
+			model.width = model.height = undefined;
+			exports.tapi('banners_save ERROR', model, function() {
+				exports.caller.exec('refresh');
+				hide();
+			});
+		};
+
+	});
+
+</script>
