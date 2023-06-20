@@ -25,7 +25,7 @@
 		</div>
 	</header>
 
-	<ui-component name="viewbox" config="parent:auto;margin:60" class="invisible">
+	<ui-component name="viewbox" config="parent:window;margin:60" class="invisible">
 		<div>
 			<div class="padding">
 
@@ -37,7 +37,7 @@
 					</div>
 				</ui-bind>
 
-				<ui-component name="empty" path="?.items" config="parent:.ui-scrollbar-area">
+				<ui-component name="empty" path="?.items" config="parent:.ui-scrollbar-area;margin:80">
 
 					<script type="text/html">
 						<div>@(You don't have any banners)</div>
