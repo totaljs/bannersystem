@@ -30,7 +30,7 @@ LOADCONFIG(db.config);
 MAIN.cache = {};
 
 // UI components
-COMPONENTATOR('ui', 'exec,locale,aselected,floatingbox,page,viewbox,input,importer,box,cloudeditorsimple,validate,loading,intranetcss,notify,message,errorhandler,empty,menu,colorpicker,icons,miniform,clipboard,approve,columns,iframepreview,search,searchinput,fileuploader,formdata,filesaver,filereader,ready,datagrid,stats7,directory,datepicker,preview,pagination,intro', true);
+COMPONENTATOR('ui', 'exec,locale,aselected,floatingbox,viewbox,page,input,importer,box,cloudeditorsimple,validate,loading,intranetcss,notify,message,errorhandler,empty,menu,colorpicker,icons,miniform,clipboard,approve,columns,iframepreview,search,searchinput,fileuploader,formdata,filesaver,filereader,ready,datagrid,stats7,directory,datepicker,preview,pagination,intro', true);
 
 // Permissions
 ON('ready', function() {
@@ -39,5 +39,4 @@ ON('ready', function() {
 		if (item.permissions)
 			OpenPlatform.permissions.push.apply(OpenPlatform.permissions, item.permissions);
 	}
-	FUNC.refresh();
 });

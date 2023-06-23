@@ -12,7 +12,7 @@
 	<link href="@{'%cdn'}/spa.min@19.css" rel="stylesheet" />
 	<script src="@{'%cdn'}/spa.min@19.js"></script>
 	<script src="@{REPO.ui}"></script>
-	@{import('meta', 'head', 'default.css', 'func.js', 'favicon.ico')}
+	@{import('meta', 'head', 'default.css', 'favicon.ico')}
 </head>
 <body class="invisible">
 
@@ -89,8 +89,7 @@
 		common.name = '@{CONF.name}';
 		common.api = { openplatform: NAV.query.openplatform, token: NAV.query.token };
 
-		if (W.top !== W)
-			NAV.custom(true);
+		NAV.custom(true);
 
 		NAV.clientside('.jR');
 
@@ -111,6 +110,7 @@
 
 			exports.reload = function() {
 				DEF.api = QUERIFY('@{#}/api/', common.api);
+				ENV('upload', QUERIFY('/api/upload/', common.api));
 			};
 
 			exports.reload();
@@ -118,6 +118,10 @@
 		});
 
 		ROUTE('/', function() {
+			REDIRECT('/setup/banners/');
+		});
+
+		ROUTE('/setup/', function() {
 			REDIRECT('/setup/banners/');
 		});
 

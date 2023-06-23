@@ -85,6 +85,7 @@ NEWSCHEMA('Banners', function(schema) {
 
 			if (MAIN.db.banners[params.id]) {
 				delete MAIN.db.banners[params.id];
+				DATA.remove('nosql/campaigns').where('bannerid', params.id);
 				MAIN.db.save();
 				EMIT('banners_refresh');
 				$.success();

@@ -13,9 +13,11 @@
 	.CLASS .campaigns .status { width: 166px; float: left; border-right: 1px solid #E0E0E0; margin-right: 10px; margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; color: #000; }
 	.CLASS .campaigns .active { color: #000; }
 	.CLASS .campaigns .active .status { color: var(--color); }
-	.CLASS .campaigns .stats { width: 86px; text-align: right; float: right; border-left: 1px solid #e0e0e0; font-size: 11px; margin-top: 3px; padding-left: 10px; }
-	.CLASS .campaigns .stats span { margin-right: 10px; }
-	.CLASS .campaigns .date { font-size: 11px; border-left: 1px solid #e0e0e0; padding-left: 10px; margin-left: 10px; line-height: 21px; /* width: 100px; */float: right; color: #777; margin-right: 10px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: right; }
+	.CLASS .campaigns .views { width: 86px; text-align: right; float: right; border-left: 1px solid #e0e0e0; font-size: 11px; margin-top: 3px; padding-left: 10px; }
+	.CLASS .campaigns .views span { margin-right: 10px; }
+	.CLASS .campaigns .clicks { width: 86px; text-align: right; float: right; border-left: 1px solid #e0e0e0; font-size: 11px; margin-top: 3px; padding-left: 10px; }
+	.CLASS .campaigns .date { width: 83px; font-size: 11px; border-left: 1px solid #e0e0e0; padding-left: 10px; margin-left: 10px; line-height: 21px; float: right; color: #777; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: right; }
+	.CLASS .campaigns .limit { width: 95px; font-size: 11px; border-left: 1px solid #e0e0e0; padding-left: 10px; margin-left: 10px; line-height: 21px; float: right; color: #777; text-align: right; margin-right: 10px; }
 	.CLASS .campaigns .name { line-height: 21px; float: left; }
 	.CLASS .campaigns .name > span { margin-right: 5px; display: inline-block; max-width: 650px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 	.CLASS .campaigns .options { float: right; margin-top: 2px; padding-left: 10px; border-left: 1px solid #e0e0e0; }
@@ -57,7 +59,7 @@
 		.CLASS header label .size { font-size: 11px; }
 		.CLASS .listing figure section { position: relative; height: 50px !important; }
 		.CLASS .campaigns .status { width: 30px; }
-		.CLASS .campaigns .date { position: absolute; bottom: 2px; left: 25px; border-left: 0; }
+		.CLASS .campaigns .date { width: auto; position: absolute; bottom: 2px; left: 25px; border-left: 0; }
 		.CLASS .campaigns .options { border-left: 0; }
 		.CLASS .ui-pagination { padding: 0 !important; }
 		.CLASS .search { max-width: 100%; }
@@ -180,18 +182,22 @@
 									<div class="options">
 										<i class="ti ti-cog exec" data-exec="?/options" data-prevent="true"></i>
 									</div>
+									<div class="limit">
+										<span>{{ if m.dtend }}<span title="@(Campaign end date)">{{ m.dtend | format('dd.MM.yyyy')}}</span>{{ else }}<span title="@(Limit)">{{ m.count }} {{ m.limit }}</span>{{ fi }}</span>
+									</div>
 									<div class="date">
 										<span title="@(Campaign start date)"><i class="ti ti-clock mr5"></i>{{ m.dtbeg | format('dd.MM.yyyy') }}</span>
-										<span> - </span>
-										<span>{{ if m.dtend }}<span title="@(Campaign end date)">{{ m.dtend | format('dd.MM.yyyy')}}</span>{{ else }}<span title="@(Campaign end)">{{ m.count }} {{ m.limit }}</span>{{ fi }}</span>
 									</div>
+
 									<div class="prediction hidden-sm">
 										<span class="mr5">@(Prediction:)</span>
 										<span>{{ m.prediction }}</span>
 									</div>
-									<div class="stats hidden-sm">
-										<span title="@(Campaign views)"><i class="ti ti-eye mr5"></i>{{ m.views }}</span>
+									<div class="clicks hidden-sm">
 										<span title="@(Campaign clicks)"><i class="ti ti-pointer mr5"></i>{{ m.clicks }}</span>
+									</div>
+									<div class="views hidden-sm">
+										<span title="@(Campaign views)"><i class="ti ti-eye mr5"></i>{{ m.views }}</span>
 									</div>
 									<div class="customer hidden-sm">
 										{{ if m.customer }}<span class="badge badge-small badge-silver ml5" title="@(Customer)">{{ m.customer }}</span>{{ fi }}
