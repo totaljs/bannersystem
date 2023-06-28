@@ -12,7 +12,7 @@ if (!db.config)
 var config = db.config;
 
 if (!config.name)
-	config.name = 'BannerSystem';
+	config.name = 'Banner System';
 
 if (!config.cdn)
 	config.cdn = '//cdn.componentator.com';
