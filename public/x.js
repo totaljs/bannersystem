@@ -5,7 +5,7 @@
 			var id = el.getAttribute('data-id');
 			var aid = (ls && ls.getItem('a_' + id)) || '';
 			var req = new XMLHttpRequest();
-				req.addEventListener('load', function() {
+			req.addEventListener('load', function() {
 				if (req.responseText) {
 					try {
 						var data = JSON.parse(req.responseText);
