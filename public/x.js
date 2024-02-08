@@ -1,7 +1,8 @@
 (function() {
-	setTimeout(function() {
+	var W = window;
+	W.bannersystemrefresh = function() {
 		var append = function(el) {
-			var ls = window.localStorage;
+			var ls = W.localStorage;
 			var id = el.getAttribute('data-id');
 			var aid = (ls && ls.getItem('a_' + id)) || '';
 			var req = new XMLHttpRequest();
@@ -28,5 +29,6 @@
 		var arr = document.querySelectorAll('.x');
 		for (var i = 0; i < arr.length; i++)
 			setTimeout(append, (100 * i + 1), arr[i]);
-	}, 50);
+	};
+	setTimeout(W.bannersystemrefresh, 50);
 })();
