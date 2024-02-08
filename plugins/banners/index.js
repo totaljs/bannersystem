@@ -44,7 +44,7 @@ function filescript(req, res) {
 	} else {
 		processed = 1;
 		PATH.fs.readFile(PATH.public('x.js'), function(err, response) {
-			PATH.fs.writeFile(PATH.public('x.min.js'), U.minify_js(response.toString('utf8').replace('{0}', req.hostname())), function() {
+			PATH.fs.writeFile(PATH.public('x.min.js'), U.minify_js(response.toString('utf8').replace('{0}', CONF.url || req.hostname())), function() {
 				processed = 2;
 				res.continue();
 			});
