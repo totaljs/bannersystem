@@ -3,3 +3,7 @@ services:
     build: .
     ports:
       - "8000:8000"
+    volumes:
+      - databases:/www/.src/databases/
+volumes:
+  databases:
