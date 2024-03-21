@@ -2,8 +2,8 @@ exports.install = function() {
 
 	CORS();
 
-	ROUTE('+POST    /', http, [60 * 5000], 1024); // 5 min. timeout + 1024 kB data
-	ROUTE('+POST    /api/upload/', upload, 1024);
+	ROUTE('+POST  /', http, [60 * 5000], 1024); // 5 min. timeout + 1024 kB data
+	ROUTE('+POST  /api/upload/', upload, 1024);
 
 	// Index
 	ROUTE('GET /', index);
