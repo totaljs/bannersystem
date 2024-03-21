@@ -67,10 +67,12 @@ function banner() {
 
 	if (arr[2]) {
 
-		banner.clicks2++;
 
 		var ad = MAIN.campaigns[id].findItem('id', arr[2]);
 		var referrer = $.headers.referer || '';
+
+		banner.clicks2++;
+		ad.clicks2++;
 
 		if ($.query.origin)
 			$.res.setHeader('referer', $.query.origin);
@@ -138,9 +140,9 @@ function refresh() {
 			if (ad.clicks2 || ad.views2) {
 				var mod = { '+clicks': ad.clicks2, '+views': ad.views2 };
 				if (ad.limit === 'clicks')
-					mod.iscompleted = ad.clicks + ad.clicks2 >= ad.count;
+					mod.iscompleted = (ad.clicks + ad.clicks2) >= ad.count;
 				else if (ad.limit === 'views')
-					mod.iscompleted = ad.views + ad.views2 >= ad.count;
+					mod.iscompleted = (ad.views + ad.views2) >= ad.count;
 				else if (ad.limit === 'date')
 					mod.iscompleted = mod.dtend < NOW;
 				DATA.modify('nosql/campaigns', mod).id(ad.id);
