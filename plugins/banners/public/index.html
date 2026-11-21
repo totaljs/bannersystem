@@ -90,11 +90,11 @@
 
 		exports.refresh = function(el) {
 			el && el.find('i').aclass('ti-spin').rclass('ti-spin', 1000);
-			exports.tapi('banners ERROR', 'items');
+			exports.tapi('Banners|list ERROR', 'items');
 		};
 
 		exports.create = function() {
-			SET('common.form', 'formbanner')
+			SET('*form', 'formbanner')
 		};
 
 		exports.detail = function(el) {
@@ -128,18 +128,18 @@
 		};
 
 		exports.update = function(id) {
-			exports.tapi('banners_read/{0} @showloading'.format(id), function(response) {
+			exports.tapi('Banners|read @showloading', { id: id }, function(response) {
 				var size = response.size.split('x');
 				response.width = +size[0];
 				response.height = +size[1];
 				SET('formbanner', response);
-				SET('common.form @hideloading', 'formbanner');
+				SET('*form @hideloading', 'formbanner');
 			});
 		};
 
 		exports.remove = function(id) {
 			EXEC('-approve/show', '@(Are you sure you want to remove selected banner?)', '"ti ti-trash" @(Remove)', function() {
-				exports.tapi('banners_remove/{0} @showloading ERROR'.format(id), function() {
+				exports.tapi('Banners|remove @showloading ERROR', { id: id }, function() {
 					exports.refresh();
 					EXEC('-notify/success @hideloading', '@(The banner has been removed successfully.)');
 				});

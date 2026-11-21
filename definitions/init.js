@@ -15,10 +15,10 @@ if (!config.name)
 	config.name = 'Banner System';
 
 if (!config.cdn)
-	config.cdn = '//cdn.componentator.com';
+	config.cdn = 'https://cdn.componentator.com';
 
 // Fixed settings
-CONF.allow_custom_titles = true;
+CONF.$customtitles = true;
 CONF.version = '1';
 CONF.op_icon = 'ti ti-gamepad';
 CONF.op_path = '/setup/';
@@ -34,8 +34,8 @@ COMPONENTATOR('ui', 'exec,locale,aselected,floatingbox,viewbox,page,input,import
 
 // Permissions
 ON('ready', function() {
-	for (var key in F.plugins) {
-		var item = F.plugins[key];
+	for (var key in Total.plugins) {
+		var item = Total.plugins[key];
 		if (item.permissions)
 			OpenPlatform.permissions.push.apply(OpenPlatform.permissions, item.permissions);
 	}

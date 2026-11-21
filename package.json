@@ -7,7 +7,7 @@
       "url": "https://github.com/totaljs/bannersystem"
   },
   "dependencies": {
-    "total4": "latest"
+    "total5": "latest"
   },
   "scripts": {
     "start": "node index.js 8000"

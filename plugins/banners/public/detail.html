@@ -89,7 +89,7 @@
 			<button class="exec" data-exec="?/create"><i class="ti ti-plus-circle"></i><span class="hidden-sm">@(Create)</span></button>
 		</div>
 	</header>
-	<ui-component name="viewbox" path="common.page" config="parent:window;scrollbar:1;scrollbarshadow:1;margin:115;marginxs:130">
+	<ui-component name="viewbox" path="*page" config="parent:window;scrollbar:1;scrollbarshadow:1;margin:115;marginxs:130">
 		<div class="padding bg-smoke stats-container">
 			<div class="panels grid-3 grid-sm-1 grid-xs-1">
 				<div class="panel">
@@ -104,15 +104,15 @@
 						<div class="keyvalues">
 							<div class="keyvalue">
 								<div class="key">@(Today views)</div>
-								<ui-bind path="?.data.visitors" config="text" class="value"></ui-bind>
+								<ui-bind path="?.data.visitors" config="text:(value || 0) + ''" class="value"></ui-bind>
 							</div>
 							<div class="keyvalue">
 								<div class="key">@(All views)</div>
-								<ui-bind path="?.data.allviews" config="text" class="value"></ui-bind>
+								<ui-bind path="?.data.allviews" config="text:(value || 0) + ''" class="value"></ui-bind>
 							</div>
 							<div class="keyvalue">
 								<div class="key">@(Average daily traffic) <span class="gray">(@(last week))</span></div>
-								<ui-bind path="?.data.averageviews" config="text" class="value"></ui-bind>
+								<ui-bind path="?.data.averageviews" config="text:(value || 0) + ''" class="value"></ui-bind>
 							</div>
 						</div>
 					</div>
@@ -129,7 +129,7 @@
 										</script>
 									</ui-bind>
 								</div>
-								<ui-bind path="?.data.isdisabled" config="checked:value===false" child="input">
+								<ui-bind path="?.data.isdisabled" config="checked:value===false">
 									<div class="toggler">
 										<label class="switch">
 												<input type="checkbox" class="exec" data-exec="?/toggle">
@@ -142,7 +142,7 @@
 								<div class="key">
 									@(Active campaigns)
 								</div>
-								<ui-bind path="?.data.campaigns" config="text" class="value"></ui-bind>
+								<ui-bind path="?.data.campaigns" config="text:(value || 0) + ''" class="value"></ui-bind>
 							</div>
 							<button class="exec bannerbtn" data-exec="?/intro">@(Set up a banner on your website)</button>
 						</div>
@@ -241,7 +241,7 @@
 	</div>
 </ui-plugin>
 
-<ui-component name="importer" path="common.form" config="if:formcampaign;url:@{#}/~ID~/forms/campaign.html"></ui-component>
+<ui-component name="importer" path="*form" config="if:formcampaign;url:@{#}/~ID~/forms/campaign.html"></ui-component>
 
 <script>
 	PLUGIN(function(exports) {
@@ -252,9 +252,10 @@
 			exports.refresh();
 		};
 
+		// The banner is loaded first: the prediction of every campaign needs its average views
 		exports.refresh = function(el) {
 			el && el.find('i').aclass('ti-spin').rclass('ti-spin', 1000);
-			exports.filter();
+			exports.bannerdata(() => exports.filter());
 		};
 
 		exports.filter = function(page) {
@@ -266,7 +267,7 @@
 			filter.page = typeof(page) === 'number' ? page : 1;
 			filter.q = search;
 
-			exports.tapi(QUERIFY('campaigns/{0}'.format(id), filter) + '  ERROR @hideloading', function(response) {
+			exports.tapi(QUERIFY('Campaigns|list ERROR @hideloading', filter), { id: id }, function(response) {
 				if (!(response instanceof Array)) {
 					for (var item of response.items) {
 						item.averageviews = model.data.averageviews;
@@ -276,13 +277,11 @@
 				}
 				exports.set('items', response);
 			});
-
-			exports.bannerdata();
 		};
 
-		exports.bannerdata = function() {
+		exports.bannerdata = function(callback) {
 			var id = NAV.params[0];
-			exports.tapi('banners_read/{0} ERROR'.format(id), function(response) {
+			exports.tapi('Banners|read ERROR', { id: id }, function(response) {
 
 				var all = response.stats.reduce(function(a, b) {
 					return a + b;
@@ -294,18 +293,19 @@
 				response.averageviews = averageviews;
 				exports.set('data', response);
 				exports.bannersetup();
+				callback && callback();
 			});
 		};
 
 		exports.updatebanner = function(el) {
 			var model = exports.model;
-			exports.tapi('banners_read/{0}'.format(model.id), function(response) {
+			exports.tapi('Banners|read', { id: model.id }, function(response) {
 				var size = response.size.split('x');
 				response.size = model.size;
 				response.width = +size[0];
 				response.height = +size[1];
 				SET('formbanner', response);
-				SET('common.form', 'formbanner');
+				SET('*form', 'formbanner');
 			});
 		};
 
@@ -328,7 +328,7 @@
 			data.clicks = 0;
 
 			SET('formcampaign @default', data);
-			SET('common.form', 'formcampaign');
+			SET('*form', 'formcampaign');
 		};
 
 		exports.detail = function(el) {
@@ -336,14 +336,14 @@
 			var id = ATTRD(el);
 			var size = model.size.split('x');
 
-			exports.tapi('campaigns_read/{0} ERROR'.format(id), function(response) {
+			exports.tapi('Campaigns|read ERROR', { id: id }, function(response) {
 				response.size = model.size;
 				response.width = +size[0];
 				response.height = +size[1];
 				response.averagereviews = model.averagereviews;
 				response.campaigns = model.campaigns;
 				SET('formcampaign @default', response);
-				SET('common.form', 'formcampaign');
+				SET('*form', 'formcampaign');
 			});
 		};
 
@@ -368,7 +368,7 @@
 
 			model.container = '<div class="x" data-id="' + model.id + '"></div>';
 			model.scr = '<scr' + 'ipt src="' + location.origin + '/x.min.js" async defer></scr'+'ipt>';
-			exports.upd('?.data');
+			exports.upd('data');
 		};
 
 		exports.copy = function(el) {
@@ -411,7 +411,7 @@
 		};
 
 		exports.disable = function(id, el) {
-			exports.tapi('campaigns_disable/{0} @showloading ERROR'.format(id), function() {
+			exports.tapi('Campaigns|disable @showloading ERROR', { id: id }, function() {
 				exports.refresh();
 				EXEC('-notify/success @hideloading', '@(The campaign has been disabled.)');
 			});
@@ -419,7 +419,7 @@
 
 		exports.resetstats = function(id) {
 			EXEC('-approve/show', '@(Are you sure you want to reset campaign stats?)', '"ti ti-trash" @(Reset)', function() {
-				exports.tapi('campaigns_reset/{0} @showloading ERROR'.format(id), function() {
+				exports.tapi('Campaigns|reset @showloading ERROR', { id: id }, function() {
 					exports.refresh();
 					EXEC('-notify/success @hideloading', '@(The campaign has been reseted successfully.)');
 				});
@@ -428,7 +428,7 @@
 
 		exports.remove = function(id) {
 			EXEC('-approve/show', '@(Are you sure you want to remove selected capaign?)', '"ti ti-trash" @(Remove)', function() {
-				exports.tapi('campaigns_remove/{0} @showloading ERROR'.format(id), function() {
+				exports.tapi('Campaigns|remove @showloading ERROR', { id: id }, function() {
 					exports.refresh();
 					EXEC('-notify/success @hideloading', '@(The campaign has been removed successfully.)');
 				});
@@ -443,7 +443,7 @@
 			else
 				model.isdisabled = true;
 
-			exports.tapi('banners_disable/{0} ERROR'.format(model.id), function() {
+			exports.tapi('Banners|disable ERROR', { id: model.id }, function() {
 				exports.upd('data.isdisabled');
 				EXEC('-notify/success @hideloading', model.isdisabled ? '@(The banner has been disabled)' : '@(The banner has been enabled)');
 			});

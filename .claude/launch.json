@@ -1,0 +1,11 @@
+{
+	"version": "0.0.1",
+	"configurations": [
+		{
+			"name": "bannersystem",
+			"runtimeExecutable": "node",
+			"runtimeArgs": ["index.js"],
+			"port": 8010
+		}
+	]
+}

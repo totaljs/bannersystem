@@ -1,4 +1,4 @@
-<ui-component name="miniform" path="common.form" config="if:~PATH~;icon:ti ti-game-board-alt;autofocus:1;reload:?/reload;closeesc:1;scrollbar:0;submit:?/submit;width:500" class="hidden ~PATH~" plugin="~PATH~">
+<ui-component name="miniform" path="*form" config="if:CLASS;icon:ti ti-game-board-alt;autofocus:1;reload:?/reload;closeesc:1;scrollbar:0;submit:?/submit;width:500" class="hidden CLASS" plugin="CLASS">
 	<div>
 		<div class="padding">
 			<ui-component name="input" path="?.name" config="required:1;maxlength:80" default="''">@(Name)</ui-component>
@@ -48,8 +48,9 @@
 			var model = exports.form;
 			model.size = model.width + 'x' + model.height;
 			model.width = model.height = undefined;
-			exports.tapi('banners_save ERROR', model, function() {
-				exports.caller.exec('refresh');
+			exports.tapi('Banners|save ERROR', model, function() {
+				// The page that opened the form (the list or the detail) loads the changed data
+				EXEC(common.page + '/refresh');
 				hide();
 			});
 		};

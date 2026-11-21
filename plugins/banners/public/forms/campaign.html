@@ -4,7 +4,7 @@
 	.CLASS .prediction { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background-color: #F0F0F0; border-radius: var(--radius); }
 </style>
 
-<ui-component name="box" path="common.form" config="if:~PATH~;icon:ti ti-game-board-alt;autofocus:1;reload:?/reload;closeesc:1;scrollbar:1;submit:?/submit;width:760" class="hidden ~PATH~" plugin="~PATH~">
+<ui-component name="box" path="*form" config="if:CLASS;icon:ti ti-game-board-alt;autofocus:1;reload:?/reload;closeesc:1;scrollbar:1;submit:?/submit;width:760" class="hidden CLASS" plugin="CLASS">
 	<div class="padding bg-smoke">
 		<br />
 		<div class="upload-photo-container">
@@ -90,8 +90,9 @@
 
 		exports.submit = function(hide) {
 			var model = exports.form;
-			exports.tapi('campaigns_save @showloading ERROR', model, function() {
-				exports.caller.exec('refresh @hideloading');
+			exports.tapi('Campaigns|save @showloading ERROR', model, function() {
+				// The detail of the banner, which opened the form, loads the changed campaigns
+				EXEC(common.page + '/refresh @hideloading');
 				hide();
 			});
 		};

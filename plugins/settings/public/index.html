@@ -4,7 +4,7 @@
 		<label><i class="ti ti-cog"></i>@(Configuration)</label>
 	</header>
 
-	<ui-component name="viewbox" path="common.page" config="parent:window;margin:60;scrollbarshadow:1;centered:1" class="invisible">
+	<ui-component name="viewbox" path="*page" config="parent:window;margin:60;scrollbarshadow:1;centered:1" class="invisible">
 
 		<br />
 		<br />
@@ -64,12 +64,12 @@
 	PLUGIN(function(exports) {
 
 		exports.reload = function() {
-			exports.tapi('setup_read ERROR', '');
+			exports.tapi('Setup|read ERROR', '');
 		};
 
 		exports.submit = function() {
 			var form = exports.form;
-			exports.tapi('setup_save ERROR', form, function() {
+			exports.tapi('Setup|save ERROR', form, function() {
 
 				if (!form.op_reqtoken && !form.op_restoken && common.api.token !== form.token) {
 					SETTER('message/success', '@(The configuration has been saved successfully, but the app needs to be reloaded.)', function() {

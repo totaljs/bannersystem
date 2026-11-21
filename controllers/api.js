@@ -1,36 +1,26 @@
+// Public HTTP routes: the home page, the upload of campaign pictures and their download.
+
 exports.install = function() {
 
 	CORS();
 
-	ROUTE('+POST  /', http, [60 * 5000], 1024); // 5 min. timeout + 1024 kB data
-	ROUTE('+POST  /api/upload/', upload, 1024);
+	// A picture of a campaign, 1 MB at most
+	ROUTE('+POST /api/upload/ @upload <1MB', upload);
 
 	// Index
 	ROUTE('GET /', index);
 	ROUTE('FILE /download/*.*', download);
 };
 
-function index() {
+function index($) {
 	if (CONF.token)
-		this.plain(CONF.name);
+		$.text(CONF.name);
 	else
-		this.redirect('/setup/');
+		$.redirect('/setup/');
 }
 
-function http() {
+function upload($) {
 
-	var $ = this;
-	var payload = $.body;
-
-	if (typeof(payload.data) === 'string' && payload.data.isJSON())
-		payload.data = payload.data.parseJSON(true);
-
-	FUNC.render(payload, $);
-}
-
-function upload() {
-
-	var $ = this;
 	var file = $.files[0];
 
 	if (file) {
@@ -43,8 +33,8 @@ function upload() {
 
 }
 
-function download(req, res) {
-	var filename = req.split[1];
+function download($) {
+	var filename = $.split[1];
 	var index = filename.lastIndexOf('.');
-	res.filefs('files', filename.substring(0, index), !!req.query.download);
+	$.filefs('files', filename.substring(0, index), !!$.query.download);
 }

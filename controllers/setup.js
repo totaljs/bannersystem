@@ -1,27 +1,27 @@
+// The setup interface: one page that loads the UI of the visible plugins.
+
 exports.install = function() {
 	ROUTE('+GET /setup/*', setup);
 };
 
-function setup() {
+function setup($) {
 
-	var self = this;
-
-	if (self.user.openplatform && !self.user.iframe && self.query.openplatform) {
-		self.cookie(CONF.op_cookie, self.query.openplatform, NOW.add('12 hours'));
-		self.redirect(self.url);
+	if ($.user.openplatform && !$.user.iframe && $.query.openplatform) {
+		$.cookie(CONF.op_cookie, $.query.openplatform, NOW.add('12 hours'));
+		$.redirect($.url);
 		return;
 	}
 
 	var plugins = [];
 
-	for (var key in F.plugins) {
-		var item = F.plugins[key];
-		if (self.user.sa || !item.visible || item.visible(self.user)) {
+	for (var key in Total.plugins) {
+		var item = Total.plugins[key];
+		if ($.user.sa || !item.visible || item.visible($.user)) {
 			var obj = {};
 			obj.id = item.id;
 			obj.routes = item.routes;
 			obj.position = item.position;
-			obj.name = TRANSLATOR(self.user.language || '', item.name);
+			obj.name = TRANSLATE($.user.language || '', item.name);
 			obj.icon = item.icon;
 			obj.import = item.import;
 			plugins.push(obj);
@@ -29,5 +29,5 @@ function setup() {
 	}
 
 	plugins.quicksort('position');
-	self.view('index', plugins);
+	$.view('index', plugins);
 }

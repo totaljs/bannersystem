@@ -1,6 +1,6 @@
 const REG_SETUP = /\/(api|setup)\//;
+const USER = new User({ sa: true, permissions: EMPTYARRAY });
 
-var USER = { sa: true, permissions: EMPTYARRAY };
 var DDOS = {};
 
 AUTH(function($) {
