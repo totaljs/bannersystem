@@ -1,0 +1,58 @@
+<ui-component name="miniform" path="*form" config="if:~PATH~;icon:ti ti-key;title:@(Create token);reload:?/reload;submit:?/submit;closeesc:1;width:500" class="hidden ~PATH~" plugin="~PATH~">
+	<div class="padding">
+		<ui-bind path="?.token" config="hide" class="block">
+			<div class="m">
+				<ui-component name="input" path="?.name" config="required:1;maxlength:50;placeholder:@(For example Claude on my laptop)">@(Name)</ui-component>
+			</div>
+			<div class="m">
+				<ui-component name="input" path="?.expire" config="required:1;dirsource:MCP_EXPIRATIONS">@(Expiration)</ui-component>
+			</div>
+			<div class="help">@(The AI can do everything that you can do with the banners and the campaigns, until the token expires or you revoke it.)</div>
+		</ui-bind>
+		<ui-bind path="?.token" config="show" class="hidden block">
+			<div class="message message-alert m"><i class="ti ti-warning"></i>@(Copy the token now. It is shown only once.)</div>
+			<div class="m">
+				<ui-component name="input" path="?.token" config="disabled:1;monospace:1">@(Token)</ui-component>
+			</div>
+			<div>
+				<ui-component name="input" path="?.mcp" config="disabled:1;monospace:1">@(MCP server address)</ui-component>
+			</div>
+		</ui-bind>
+	</div>
+	<nav>
+		<ui-bind path="?.token" config="hide" class="block">
+			<ui-component name="validate" path="?">
+				<button name="submit" disabled><i class="ti ti-check-circle"></i>@(CREATE)</button>
+				<button name="cancel">@(Cancel)</button>
+			</ui-component>
+		</ui-bind>
+		<ui-bind path="?.token" config="show" class="hidden block">
+			<button class="exec" data-exec="?/copy"><i class="ti ti-copy"></i>@(Copy token)</button>
+			<button name="cancel">@(Close)</button>
+		</ui-bind>
+	</nav>
+</ui-component>
+
+<script>
+
+	var MCP_EXPIRATIONS = [{ id: 7, name: '@(7 days)' }, { id: 30, name: '@(30 days)' }, { id: 90, name: '@(90 days)' }, { id: 365, name: '@(1 year)' }];
+
+	PLUGIN(function(exports) {
+
+		exports.submit = function() {
+			var model = exports.model;
+			exports.tapi('Tokens|create @showloading ERROR', { name: model.name, expire: model.expire }, function(response) {
+				SETTER('loading/hide', 500);
+				exports.set('token', response.token);
+				EXEC(common.page + '/refresh');
+			});
+		};
+
+		exports.copy = function() {
+			SETTER('clipboard/copy', exports.model.token);
+			SETTER('notify/success', '@(The token has been copied.)');
+		};
+
+	});
+
+</script>

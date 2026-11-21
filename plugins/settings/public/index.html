@@ -1,56 +1,47 @@
 <ui-plugin>
-
-	<header>
-		<label><i class="ti ti-cog"></i>@(Configuration)</label>
-	</header>
-
-	<ui-component name="viewbox" path="*page" config="parent:window;margin:60;scrollbarshadow:1;centered:1" class="invisible">
-
+	<ui-component name="viewbox" path="*page" config="parent:window;margin:[margin];scrollbarshadow:1">
 		<br />
-		<br />
-		<div class="panel left auto" style="max-width:600px">
-
-			<label><i class="ti ti-cog"></i>@(Configuration)</label>
-			<div class="padding">
-				<div class="m">
-					<ui-component name="input" path="?.name" config="required:1">@(Name)</ui-component>
-				</div>
-
-				<div class="caption m">
-					<label><i class="ti ti-lock"></i>@(Security)</label>
-				</div>
-
-				<div>
-					<ui-component name="input" path="?.token" config="camouflage:1;placeholder:@(Enter a token)">@(Primary access token)</ui-component>
-					<div class="help"><span class="link exec" data-exec="?/token"><i class="ti ti-qrcode-alt"></i>@(Generate)</span>. @(You can manage this app by using the token above.)</div>
-				</div>
-			</div>
-			<div class="padding bg-smoke">
-				<div class="panel m">
-					<label><i class="ti ti-totaljs color"></i>@(OpenPlatform)</label>
-					<div class="padding">
-
-						<p>@(You can provide this application on the Total.js OpenPlatform. First, you must obtain tokens from the application registration form in the OpenPlatform instance.)</p>
-
-						<div class="grid-2">
-							<div class="m">
-								<ui-component name="input" path="?.op_reqtoken" config="camouflage:1;placeholder:@(Enter a token)">@(Request token)</ui-component>
-							</div>
-							<div class="m">
-								<ui-component name="input" path="?.op_restoken" config="camouflage:1;placeholder:@(Enter a token)">@(Response token)</ui-component>
-							</div>
-						</div>
-						<div class="message message-alert">
-							<div class="b"><i class="ti ti-warning mr5"></i>@(Warning)</div>
-							@(You will be automatically logged out if you enter tokens for the OpenPlatform.)
-						</div>
+		<div style="margin:0 auto;max-width:720px;text-align:left;padding:var(--gap)">
+			<div class="panel">
+				<label><i class="ti ti-cog"></i>@(Configuration)</label>
+				<div style="padding:var(--gap)" class="bg-smoke">
+					<div class="m">
+						<ui-component name="input" path="?.name" config="required:1">@(App name)</ui-component>
 					</div>
 				</div>
-			</div>
-			<div class="padding">
-				<ui-component name="validate" path="?">
-					<button name="submit" class="button exec" data-exec="?/submit" disabled><i class="ti ti-check-circle"></i>@(SUBMIT)</button>
-				</ui-component>
+				<div style="padding:var(--gap)">
+					<div class="m">
+						<ui-component name="input" path="?.op" config="type:checkbox">@(Enable OpenPlatform integration)</ui-component>
+					</div>
+					<ui-bind path="?.op" config="show" class="block">
+						<div class="padding radius bg-highlight">
+							<p>@(This application is designed to work with the Total.js OpenPlatform. Copy the link below and register it on the OpenPlatform.)</p>
+							<ui-bind path="?" config="track:op;template" class="block fs12 radius bg-white padding">
+								<script type="text/html">
+									<div class="b">@(Link for the OpenPlatform:)</div>
+									<a href="/openplatform.json?reqtoken={{ value.op_reqtoken }}&restoken={{ value.op_restoken }}" target="_blank" class="block hellip monospace mt5 b"><i class="ti ti-globe mr5"></i><span></span>{{ value.origin }}/openplatform.json?reqtoken={{ value.op_reqtoken }}&restoken={{ value.op_restoken }}</a>
+									<div class="help" style="margin-top:2px"><span class="exec link gray" data-exec="?/opcopy"><i class="ti ti-copy mr5"></i>@(Copy link)</span></div>
+								</script>
+							</ui-bind>
+							<div class="help right"><span class="exec link gray" data-exec="?/optoken"><i class="ti ti-key mr5"></i>@(Re-generate tokens)</span></div>
+						</div>
+					</ui-bind>
+				</div>
+
+				<ui-bind path="?.items" config="show:value&&value.length" class="block hidden">
+					<hr class="nmt nmb" />
+					<div style="padding:var(--gap)">
+						<ui-component name="configuration" path="?.data" config="style:1;$assign:?|configuration"></ui-component>
+					</div>
+				</ui-bind>
+
+				<hr class="nmt nmb" />
+
+				<div class="padding">
+					<ui-component name="validate" path="?">
+						<button name="submit" class="button exec" data-exec="?/submit" disabled><i class="ti ti-check-circle"></i>@(SUBMIT)</button>
+					</ui-component>
+				</div>
 			</div>
 		</div>
 		<br />
@@ -64,29 +55,63 @@
 	PLUGIN(function(exports) {
 
 		exports.reload = function() {
-			exports.tapi('Setup|read ERROR', '');
-		};
 
-		exports.submit = function() {
-			var form = exports.form;
-			exports.tapi('Setup|save ERROR', form, function() {
+			BREADCRUMB.add('@(Settings)', NAV.url);
 
-				if (!form.op_reqtoken && !form.op_restoken && common.api.token !== form.token) {
-					SETTER('message/success', '@(The configuration has been saved successfully, but the app needs to be reloaded.)', function() {
-						location.href = '@{#}/setup/?token=' + form.token;
-					});
-				} else {
-					common.api.token = form.token;
-					EXEC('common/reload');
-					EXEC('-notify/success', '@(The configuration has been saved successfully.)');
+			exports.tapi('Settings|read ERROR @showloading', function(response) {
+
+				WAIT(() => exports.configuration, function() {
+					exports.configuration.rebind(response.items);
+				});
+
+				var data = {};
+
+				for (var m of response.items) {
+					if (m.type !== 'group')
+						data[m.id] = m.value;
 				}
+
+				response.data = data;
+				response.origin = location.origin;
+
+				if (!response.op_reqtoken)
+					response.op_reqtoken = GUID(40);
+
+				if (!response.op_restoken)
+					response.op_restoken = GUID(40);
+
+				exports.set('@reset @hideloading', response);
 
 			});
 		};
 
-		exports.token = function() {
-			exports.set('token @type:show @change', GUID(30));
+		exports.optoken = function() {
+			exports.set('op_reqtoken', GUID(40));
+			exports.set('op_restoken', GUID(40));
+			exports.upd('op');
+			EXEC('-notify/success', '@(Tokens have been regenerated. <b>Submit settings</b>.)');
+		};
+
+		exports.opcopy = function(el) {
+			let url = el.closest('ui-bind').find('a').text();
+			EXEC('-clipboard/copy @copied', url);
+		};
+
+		exports.submit = function() {
+
+			let form = CLONE(exports.form);
+			let items = [];
+
+			for (let key in form.data)
+				items.push({ id: key, value: form.data[key] });
+
+			delete form.data;
+			form.items = items;
+			form.url = location.origin;
+
+			exports.tapi('Settings|save ERROR @showloading', form, () => FLAGS('@saved @hideloading'));
 		};
 
 	});
+
 </script>

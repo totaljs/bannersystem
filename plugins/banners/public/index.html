@@ -17,7 +17,7 @@
 
 <ui-plugin config="aclass:1">
 
-	<header>
+	<header class="pageheader">
 		<label><i class="ti ti-game-board-alt"></i>@(Banners)</label>
 		<div class="toolbar">
 			<button class="exec" data-exec="?/refresh"><i class="ti ti-refresh"></i>@(Refresh)</button>
@@ -25,7 +25,7 @@
 		</div>
 	</header>
 
-	<ui-component name="viewbox" config="parent:window;margin:60" class="invisible">
+	<ui-component name="viewbox" config="parent:window;margin:120" class="invisible">
 		<div>
 			<div class="padding">
 
@@ -85,6 +85,7 @@
 	PLUGIN(function(exports) {
 
 		exports.reload = function() {
+			BREADCRUMB.add('@(Banners)', NAV.url);
 			exports.refresh();
 		};
 
@@ -99,7 +100,7 @@
 
 		exports.detail = function(el) {
 			var id = ATTRD(el);
-			REDIRECT('/setup/banners/{0}/'.format(id));
+			REDIRECT('/banners/{0}/'.format(id));
 		};
 
 		exports.options = function(el) {

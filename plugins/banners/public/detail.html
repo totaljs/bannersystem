@@ -68,8 +68,8 @@
 
 <ui-plugin config="aclass:1">
 
-	<header>
-		<a href="../" class="back jR"><i class="ti ti-angle-left"></i></a>
+	<header class="pageheader">
+		<a href="/banners/" class="back jR"><i class="ti ti-angle-left"></i></a>
 		<label>
 			<ui-bind path="?.data.icon" config="template" class="hidden-sm">
 				<script type="text/html">
@@ -89,7 +89,7 @@
 			<button class="exec" data-exec="?/create"><i class="ti ti-plus-circle"></i><span class="hidden-sm">@(Create)</span></button>
 		</div>
 	</header>
-	<ui-component name="viewbox" path="*page" config="parent:window;scrollbar:1;scrollbarshadow:1;margin:115;marginxs:130">
+	<ui-component name="viewbox" path="*page" config="parent:window;scrollbar:1;scrollbarshadow:1;margin:175;marginxs:190">
 		<div class="padding bg-smoke stats-container">
 			<div class="panels grid-3 grid-sm-1 grid-xs-1">
 				<div class="panel">
@@ -291,6 +291,8 @@
 
 				response.allviews = all;
 				response.averageviews = averageviews;
+				BREADCRUMB.add('@(Banners)', '/banners/');
+				BREADCRUMB.add(response.name, NAV.url);
 				exports.set('data', response);
 				exports.bannersetup();
 				callback && callback();
@@ -340,7 +342,7 @@
 				response.size = model.size;
 				response.width = +size[0];
 				response.height = +size[1];
-				response.averagereviews = model.averagereviews;
+				response.averageviews = model.averageviews;
 				response.campaigns = model.campaigns;
 				SET('formcampaign @default', response);
 				SET('*form', 'formcampaign');
@@ -476,13 +478,13 @@
 
 	FUNC.prediction = function(model) {
 		if (model.limit === 'date') {
-			if (!model.averagereviews)
+			if (!model.averageviews)
 				return DEF.empty;
 			var duration = Math.abs(model.dtend - model.dtbeg);
 			var allviews = Math.ceil(duration / (1000 * 60 * 60 * 24)) * model.averageviews;
 			return Math.ceil(allviews / model.campaigns).pluralize('@(# views,# view,# views,# views)');
 		} else if (model.limit === 'views') {
-			if (!model.averagereviews)
+			if (!model.averageviews)
 				return DEF.empty;
 			var days = Math.ceil(model.count / model.averageviews);
 			var dtbeg = Math.abs(model.dtbeg);

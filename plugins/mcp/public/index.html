@@ -1,0 +1,118 @@
+<style>
+	.CLASS .token { padding: 12px 15px; border-bottom: 1px solid #F0F0F0; }
+	.CLASS .token:last-child { border-bottom: 0; }
+	.CLASS .token .remove { float: right; }
+	.CLASS .expired { color: #A0A0A0; }
+	.CLASS code { font-size: 12px; background-color: #F5F5F5; padding: 2px 5px; border-radius: var(--radius); word-break: break-all; }
+	.CLASS pre { font-size: 12px; background-color: #F5F5F5; padding: 10px; border-radius: var(--radius); white-space: pre-wrap; word-break: break-all; margin: 0; }
+	.CLASS .step { margin-bottom: 12px; }
+	.CLASS .step:last-child { margin-bottom: 0; }
+</style>
+
+<ui-plugin config="aclass:1">
+
+	<header class="pageheader">
+		<label><i class="ti ti-robot"></i>@(MCP access)</label>
+		<div class="toolbar">
+			<button class="exec" data-exec="?/refresh"><i class="ti ti-refresh"></i>@(Refresh)</button>
+			<button class="exec b" data-exec="?/create"><i class="ti ti-plus-circle"></i>@(Create token)</button>
+		</div>
+	</header>
+
+	<ui-component name="viewbox" path="*page" config="parent:window;margin:120;scrollbarshadow:1" class="invisible">
+		<div style="margin:0 auto;max-width:720px;text-align:left;padding:var(--gap);width:100%">
+
+			<div class="panel m">
+				<label><i class="ti ti-robot"></i>@(MCP server)</label>
+				<div style="padding:var(--gap)">
+					<p>@(Connect your AI app to BannerSystem with this address and one of your tokens. The AI manages the banners and the campaigns with your permissions.)</p>
+					<ui-bind path="?.config" config="template" class="block">
+						<script type="text/html">
+							{{ if !value.enabled }}
+							<div class="message message-alert m"><i class="ti ti-warning"></i>@(The MCP server is off. Set <b>$mcp : true</b> in the config file and restart the app.)</div>
+							{{ fi }}
+							<div class="step">@(Address:) <code>{{ value.mcp }}</code></div>
+							<div class="step">@(Header:) <code>Authorization: Bearer &lt;@(your token)&gt;</code></div>
+							<div class="step">
+								<div class="m">@(For example in Claude Code:)</div>
+								<pre>claude mcp add --transport http bannersystem {{ value.mcp }} --header "Authorization: Bearer &lt;@(your token)&gt;"</pre>
+							</div>
+						</script>
+					</ui-bind>
+				</div>
+			</div>
+
+			<div class="panel m">
+				<label><i class="ti ti-code"></i>@(MCP code mode)</label>
+				<div style="padding:var(--gap)">
+					<p>@(An AI that can run Node.js 18 or newer can download the tools as a JavaScript client, write one script that makes many calls (a report of all campaigns, a new campaign for every banner) and read only its output.)</p>
+					<ui-bind path="?.config" config="template" class="block">
+						<script type="text/html">
+							<div class="step">@(Client:) <code>{{ value.client }}</code></div>
+							<pre>curl -H "Authorization: Bearer &lt;@(your token)&gt;" {{ value.client }} -o client.js
+
+const api = require('./client.js')('&lt;@(your token)&gt;');
+
+(async function() {
+	const banners = await api.Banners_list();
+	const campaigns = await api.Campaigns_list({ query: { limit: 100 } });
+	console.log(banners.length, campaigns.count);
+})();</pre>
+						</script>
+					</ui-bind>
+				</div>
+			</div>
+
+			<div class="panel">
+				<label><i class="ti ti-key"></i>@(My tokens)</label>
+				<ui-bind path="?.items" config="template" class="block">
+					<script type="text/html">
+						{{ if !value || !value.length }}
+						<div class="token gray">@(You don't have any tokens.)</div>
+						{{ fi }}
+						{{ foreach m in value }}
+						<div class="token{{ if m.isexpired }} expired{{ fi }}">
+							<span class="remove exec link" data-exec="?/remove" data-id="{{ m.id }}"><i class="ti ti-ban red mr5"></i>@(Revoke)</span>
+							<div class="b">{{ m.name }}</div>
+							<div class="gray fs12">@(Created) {{ m.dtcreated | format('[date]') }} &middot; {{ if m.isexpired }}@(Expired){{ else }}@(Expires) {{ m.dtexpire | format('[date]') }}{{ fi }} &middot; {{ if m.dtused }}@(Last used) {{ m.dtused | format('[ts]') }}{{ else }}@(Never used){{ fi }}</div>
+						</div>
+						{{ end }}
+					</script>
+				</ui-bind>
+			</div>
+
+			<br />
+		</div>
+	</ui-component>
+</ui-plugin>
+
+<ui-component name="importer" path="*form" config="if:formmcptoken;url:/~ID~/form.html"></ui-component>
+
+<script>
+	PLUGIN(function(exports) {
+
+		exports.reload = function() {
+			BREADCRUMB.add('@(MCP access)', NAV.url);
+			exports.tapi('Tokens|config ERROR', 'config');
+			exports.refresh();
+		};
+
+		exports.refresh = function(el) {
+			el && el.find('i').aclass('ti-spin').rclass('ti-spin', 1000);
+			exports.tapi('Tokens|list ERROR', 'items');
+		};
+
+		exports.create = function() {
+			SET('formmcptoken @default', { name: '', expire: 30, token: '', mcp: exports.model.config ? exports.model.config.mcp : '' });
+			SET('*form', 'formmcptoken');
+		};
+
+		exports.remove = function(el) {
+			var id = ATTRD(el);
+			EXEC('-approve/show', '@(Are you sure you want to revoke this token? The AI apps that use it will stop working.)', '"ti ti-ban" @(Revoke)', function() {
+				exports.tapi('Tokens|remove ERROR', { id: id }, exports.refresh);
+			});
+		};
+
+	});
+</script>

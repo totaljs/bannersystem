@@ -1,1 +1,17 @@
-default_uid    : f
+name                : BannerSystem
+app                 : bannersystem
+icon                : ti ti-game-board-alt
+cdn                 : /cdn/
+fullmenu            : true
+breadcrumb          : true
+color               : #4285F4
+version             : 2
+
+$api                : /
+$insecure           : true
+
+// MCP server (POST /$mcp/) and MCP code mode (GET /$mcp/client.js), with the tokens from "MCP access"
+$mcp                : true
+
+// The public address of this app: the script for websites (/x.min.js) and the MCP code mode use it
+// url                 : https://banners.hostname.com

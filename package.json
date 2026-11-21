@@ -1,22 +1,23 @@
 {
   "name": "BannerSystem",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "index.js",
   "repository": {
-      "type": "git",
-      "url": "https://github.com/totaljs/bannersystem"
+    "type": "git",
+    "url": "https://github.com/totaljs/bannersystem"
   },
   "dependencies": {
-    "total5": "latest"
+    "total5": "0.0.20-6"
   },
   "scripts": {
     "start": "node index.js 8000"
   },
   "keywords": [
-    "files",
-    "upload",
-    "storage"
+    "banners",
+    "ads",
+    "campaigns",
+    "mcp"
   ],
   "author": "Total.js",
-  "license":"MIT"
+  "license": "MIT"
 }
