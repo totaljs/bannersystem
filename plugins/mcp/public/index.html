@@ -1,0 +1,250 @@
+<style>
+	.CLASS .token { padding: 12px 15px; border-bottom: 1px solid #F0F0F0; }
+	.CLASS .token:last-child { border-bottom: 0; }
+	.CLASS .token .remove { float: right; }
+	.CLASS .expired { color: #A0A0A0; }
+	.CLASS code { font-size: 12px; background-color: #F5F5F5; padding: 2px 5px; border-radius: var(--radius); word-break: break-all; }
+	.CLASS pre { font-size: 12px; background-color: #F5F5F5; padding: 10px; border-radius: var(--radius); white-space: pre-wrap; word-break: break-all; margin: 0; tab-size: 4; }
+	.CLASS .step { margin-bottom: 12px; }
+	.CLASS .step:last-child { margin-bottom: 0; }
+	.CLASS .clients { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 12px; }
+	.CLASS .clients button { border: 1px solid #E0E0E0; background-color: #FFF; border-radius: var(--radius); height: 28px; padding: 0 10px; font-size: 12px; cursor: pointer; color: #333; }
+	.CLASS .clients button:hover { background-color: #F5F5F5; }
+	.CLASS .clients button.selected { background-color: var(--color); border-color: var(--color); color: #FFF; }
+	.CLASS .snippet { position: relative; }
+	.CLASS .snippet pre { padding-right: 70px; }
+	.CLASS .snippet .copy { position: absolute; top: 6px; right: 6px; border: 1px solid #E0E0E0; background-color: #FFF; border-radius: var(--radius); font-size: 11px; height: 24px; padding: 0 8px; cursor: pointer; }
+	.CLASS .snippet .copy:hover { background-color: #F0F0F0; }
+	.CLASS ol, .CLASS ul { margin: 0 0 12px; padding-left: 20px; line-height: 20px; }
+	.CLASS h3 { font-size: 13px; margin: 16px 0 8px; }
+	.CLASS .newtoken { background-color: #fffad7; border: 1px solid #EDE8C8; padding: 10px 12px; border-radius: var(--radius); margin-bottom: 12px; font-size: 12px; }
+</style>
+
+<ui-plugin config="aclass:1">
+
+	<header class="pageheader">
+		<label><i class="ti ti-robot"></i>@(MCP access)</label>
+		<div class="toolbar">
+			<button class="exec" data-exec="?/refresh"><i class="ti ti-refresh"></i>@(Refresh)</button>
+			<button class="exec b" data-exec="?/create"><i class="ti ti-plus-circle"></i>@(Create token)</button>
+		</div>
+	</header>
+
+	<ui-component name="viewbox" path="*page" config="parent:window;margin:120;scrollbarshadow:1" class="invisible">
+		<div style="margin:0 auto;max-width:760px;text-align:left;padding:var(--gap);width:100%">
+
+			<div class="panel m">
+				<label><i class="ti ti-robot"></i>@(MCP server)</label>
+				<div style="padding:var(--gap)">
+					<p>@(Connect your AI app to BannerSystem with this address and one of your tokens. The AI manages the banners and the campaigns with your permissions.)</p>
+					<ui-bind path="?.config" config="template" class="block">
+						<script type="text/html">
+							{{ if !value.enabled }}
+							<div class="message message-alert m"><i class="ti ti-warning"></i>@(The MCP server is off. Set <b>$mcp : true</b> in the config file and restart the app.)</div>
+							{{ fi }}
+							<div class="step">@(Address:) <code>{{ value.mcp }}</code></div>
+							<div class="step">@(Header:) <code>Authorization: Bearer &lt;@(your token)&gt;</code></div>
+						</script>
+					</ui-bind>
+
+					<ui-bind path="?.token" config="show" class="hidden block">
+						<div class="newtoken"><i class="ti ti-key mr5"></i>@(The examples below contain your new token. Copy what you need now: the token is not shown again after you leave this page.)</div>
+					</ui-bind>
+
+					<div class="m b" style="margin-top:20px">@(Choose your AI app:)</div>
+					<ui-bind path="?.clients" config="template" class="clients">
+						<script type="text/html">
+							{{ foreach m in value }}
+							<button class="exec{{ if m.selected }} selected{{ fi }}" data-exec="?/client" data-id="{{ m.id }}">{{ m.name }}</button>
+							{{ end }}
+						</script>
+					</ui-bind>
+
+					<ui-bind path="?.helpnote" config="html" class="block m"></ui-bind>
+					<ui-bind path="?.helpcode" config="show:value" class="hidden block snippet m">
+						<pre><ui-bind path="?.helpcode" config="text"></ui-bind></pre>
+						<button class="copy exec" data-exec="?/copy" data-name="helpcode"><i class="ti ti-copy mr5"></i>@(Copy)</button>
+					</ui-bind>
+					<ui-bind path="?.helpafter" config="html" class="block gray fs12"></ui-bind>
+				</div>
+			</div>
+
+			<div class="panel m">
+				<label><i class="ti ti-code"></i>@(MCP code mode)</label>
+				<div style="padding:var(--gap)">
+					<p>@(Your AI does big jobs in one go: it writes a small program that calls the tools of BannerSystem for it, and only the result reaches the conversation. It is faster and spends far fewer tokens.)</p>
+					<p>@(It works with AI apps that can run code on your computer (Node.js 18 or newer), for example Claude Code, Codex CLI, Cursor or Gemini CLI.)</p>
+
+					<h3>@(How to use it with your AI)</h3>
+					<p>@(Nothing to do: connect the MCP server above and ask as usual. BannerSystem tells your AI about the code mode when it connects, and the AI uses it when a job needs it. If you want to ask for it, one sentence is enough:)</p>
+					<div class="snippet m">
+						<pre><ui-bind path="?.prompt" config="text"></ui-bind></pre>
+						<button class="copy exec" data-exec="?/copy" data-name="prompt"><i class="ti ti-copy mr5"></i>@(Copy)</button>
+					</div>
+
+					<h3>@(When it helps)</h3>
+					<ul>
+						<li>@(A report of every campaign with its views, clicks and click rate.)</li>
+						<li>@(Pause all the campaigns of one customer, or start them again.)</li>
+						<li>@(Create the same campaign in several banners at once.)</li>
+						<li>@(Find the campaigns that end this week or are close to their limit.)</li>
+					</ul>
+					<p>@(For a single change, such as pausing one campaign, a normal call of a tool is enough.)</p>
+
+					<h3>@(What your AI does)</h3>
+					<p>@(It downloads the tools as a JavaScript client with your token, reads the description of each function and runs a script like this one:)</p>
+					<div class="snippet">
+						<pre><ui-bind path="?.codemode" config="text"></ui-bind></pre>
+						<button class="copy exec" data-exec="?/copy" data-name="codemode"><i class="ti ti-copy mr5"></i>@(Copy)</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="panel">
+				<label><i class="ti ti-key"></i>@(My tokens)</label>
+				<ui-bind path="?.items" config="template" class="block">
+					<script type="text/html">
+						{{ if !value || !value.length }}
+						<div class="token gray">@(You don't have any tokens.)</div>
+						{{ fi }}
+						{{ foreach m in value }}
+						<div class="token{{ if m.isexpired }} expired{{ fi }}">
+							<span class="remove exec link" data-exec="?/remove" data-id="{{ m.id }}"><i class="ti ti-ban red mr5"></i>@(Revoke)</span>
+							<div class="b">{{ m.name }}</div>
+							<div class="gray fs12">@(Created) {{ m.dtcreated | format('[date]') }} &middot; {{ if m.isexpired }}@(Expired){{ else }}@(Expires) {{ m.dtexpire | format('[date]') }}{{ fi }} &middot; {{ if m.dtused }}@(Last used) {{ m.dtused | format('[ts]') }}{{ else }}@(Never used){{ fi }}</div>
+						</div>
+						{{ end }}
+					</script>
+				</ui-bind>
+			</div>
+
+			<br />
+		</div>
+	</ui-component>
+</ui-plugin>
+
+<ui-component name="importer" path="*form" config="if:formmcptoken;url:/~ID~/form.html"></ui-component>
+
+<script>
+	PLUGIN(function(exports) {
+
+		var NAME = 'bannersystem';
+
+		// The AI apps in the order of the tabs (product names are not translated)
+		var APPS = [['claudecode', 'Claude Code'], ['claude', 'Claude'], ['chatgpt', 'ChatGPT'], ['codex', 'Codex CLI'], ['cursor', 'Cursor'], ['vscode', 'VS Code'], ['copilot', 'Copilot CLI'], ['gemini', 'Gemini CLI'], ['zed', 'Zed']];
+
+		// How each AI app sends the token: [what to do, the snippet (url, token), a note after the snippet]
+		var CLIENTS = {
+			claudecode: ['@(In a terminal, inside your project:)', function(url, token) {
+				return 'claude mcp add --transport http ' + NAME + ' ' + url + ' --header "Authorization: Bearer ' + token + '"';
+			}, '@(Then run <code>/mcp</code> in Claude Code to check the connection. Add <code>-s user</code> to have it in every project.)'],
+			claude: ['@(On claude.ai and in Claude Desktop, go to Customize, Connectors. Click Add, then Add custom connector, paste the MCP server address, choose No sign in and add this under Request headers:)', function(url, token) {
+				return 'Authorization: Bearer ' + token;
+			}, '@(On Team and Enterprise plans an owner adds it first in Organization settings, Connectors, and then every member connects it.)'],
+			chatgpt: ['@(ChatGPT cannot send the header with the token, and every tool of BannerSystem needs it. Use ChatGPT through Codex CLI (the next tab), which shares the configuration with the ChatGPT desktop app.)', null, ''],
+			codex: ['@(Put the token in the environment variable BANNERSYSTEM_TOKEN of your computer and add this to <code>~/.codex/config.toml</code>:)', function(url) {
+				return '[mcp_servers.' + NAME + ']\nurl = "' + url + '"\nbearer_token_env_var = "BANNERSYSTEM_TOKEN"';
+			}, '@(The ChatGPT desktop app and the Codex IDE extension share this configuration.)'],
+			cursor: ['@(Add it to <code>.cursor/mcp.json</code> in your project, or to <code>~/.cursor/mcp.json</code> for every project:)', function(url, token) {
+				var cfg = { mcpServers: {} };
+				cfg.mcpServers[NAME] = { url: url, headers: { Authorization: 'Bearer ' + token } };
+				return JSON.stringify(cfg, null, '  ');
+			}, ''],
+			vscode: ['@(With GitHub Copilot in VS Code, add it to <code>.vscode/mcp.json</code> in your project (or run MCP: Add Server from the Command Palette and choose HTTP):)', function(url, token) {
+				var cfg = { servers: {} };
+				cfg.servers[NAME] = { type: 'http', url: url, headers: { Authorization: 'Bearer ' + token } };
+				return JSON.stringify(cfg, null, '  ');
+			}, '@(Then ask in the Copilot chat in Agent mode.)'],
+			copilot: ['@(Create the file <code>~/.copilot/mcp-config.json</code> with this content:)', function(url, token) {
+				var cfg = { mcpServers: {} };
+				cfg.mcpServers[NAME] = { type: 'http', url: url, headers: { Authorization: 'Bearer ' + token } };
+				return JSON.stringify(cfg, null, '  ');
+			}, '@(Then start Copilot CLI in a terminal and ask.)'],
+			gemini: ['@(In a terminal, inside your project:)', function(url, token) {
+				return 'gemini mcp add --transport http --header "Authorization: Bearer ' + token + '" ' + NAME + ' ' + url;
+			}, '@(Add <code>-s user</code> to have it in every project. Run <code>gemini mcp list</code> to check the connection.)'],
+			zed: ['@(In Settings, AI, MCP Servers, click Add Server and Add Remote Server. Or write it in your settings file:)', function(url, token) {
+				var cfg = {};
+				cfg[NAME] = { url: url, headers: { Authorization: 'Bearer ' + token } };
+				return '"context_servers": ' + JSON.stringify(cfg, null, '  ');
+			}, '']
+		};
+
+		exports.reload = function() {
+			BREADCRUMB.add('@(MCP access)', NAV.url);
+			exports.set('token', '');
+			!exports.model.client && exports.set('client', 'claudecode');
+			exports.helpfill();
+			exports.tapi('Tokens|config ERROR', function(response) {
+				exports.set('config', response);
+				exports.helpfill();
+			});
+			exports.refresh();
+		};
+
+		exports.refresh = function(el) {
+			el && el.find('i').aclass('ti-spin').rclass('ti-spin', 1000);
+			exports.tapi('Tokens|list ERROR', 'items');
+		};
+
+		exports.client = function(el) {
+			exports.set('client', ATTRD(el));
+			exports.helpfill();
+		};
+
+		// The snippets: with the token just created, or with <your token> to replace
+		exports.helpfill = function() {
+			var model = exports.model;
+			var config = model.config || {};
+			var url = config.mcp || (location.origin + '/$mcp/');
+			var token = model.token || '<@(your token)>';
+			var client = CLIENTS[model.client] || CLIENTS.claudecode;
+
+			exports.set('clients', APPS.map(m => ({ id: m[0], name: m[1], selected: m[0] === (model.client || 'claudecode') })));
+			exports.set('helpnote', client[0]);
+			exports.set('helpcode', client[1] ? client[1](url, token) : '');
+			exports.set('helpafter', client[2] || '');
+			exports.set('prompt', '@(Use the MCP code mode of BannerSystem to make a report of every campaign with its views, clicks and click rate.)');
+			exports.set('codemode', [
+				'curl -o client.js -H "Authorization: Bearer ' + token + '" ' + (config.client || (location.origin + '/$mcp/client.js')),
+				'',
+				'// report.js',
+				'const api = require(\'./client.js\')(\'' + token + '\');',
+				'',
+				'(async function() {',
+				'	const banners = await api.Banners_list();',
+				'	for (const banner of banners) {',
+				'		const campaigns = await api.Campaigns_list({ input: { id: banner.id }, query: { limit: 100 } });',
+				'		for (const m of campaigns.items)',
+				'			console.log(banner.name, m.name, m.views, m.clicks, m.views ? (m.clicks / m.views * 100).toFixed(2) + \'%\' : \'-\');',
+				'	}',
+				'})();'
+			].join('\n'));
+		};
+
+		// Called by the form after a new token: the examples get the real token until the page is left
+		exports.created = function(token) {
+			exports.set('token', token);
+			exports.helpfill();
+			exports.refresh();
+		};
+
+		exports.copy = function(el) {
+			SETTER('clipboard/copy', exports.model[ATTRD(el, 'name')]);
+			SETTER('notify/success', '@(Copied.)');
+		};
+
+		exports.create = function() {
+			SET('formmcptoken @default', { name: '', expire: 30, token: '', mcp: exports.model.config ? exports.model.config.mcp : '' });
+			SET('*form', 'formmcptoken');
+		};
+
+		exports.remove = function(el) {
+			var id = ATTRD(el);
+			EXEC('-approve/show', '@(Are you sure you want to revoke this token? The AI apps that use it will stop working.)', '"ti ti-ban" @(Revoke)', function() {
+				exports.tapi('Tokens|remove ERROR', { id: id }, exports.refresh);
+			});
+		};
+
+	});
+</script>

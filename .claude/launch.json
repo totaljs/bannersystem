@@ -4,7 +4,7 @@
 		{
 			"name": "bannersystem",
 			"runtimeExecutable": "node",
-			"runtimeArgs": ["index.js"],
+			"runtimeArgs": ["index.js", "8010"],
 			"port": 8010
 		}
 	]

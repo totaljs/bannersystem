@@ -1,42 +1,30 @@
-var db = MAIN.db = MEMORIZE('data');
+// The data of BannerSystem: MAIN.db (MEMORIZE('data'), created in modules/openplatform.js) keeps the banners,
+// the settings and the MCP tokens; the campaigns are in the NoSQL database "campaigns".
+
+var db = MAIN.db;
 
 if (!db.banners)
 	db.banners = {};
 
-if (!db.tokens)
-	db.tokens = [];
-
-if (!db.config)
-	db.config = {};
+if (!db.mcp)
+	db.mcp = [];
 
 var config = db.config;
 
 if (!config.name)
-	config.name = 'Banner System';
+	config.name = 'BannerSystem';
 
-if (!config.cdn)
-	config.cdn = 'https://cdn.componentator.com';
+// Version 1 kept the tokens of the OpenPlatform without the switch "op" of the admin template
+if (config.op == null && config.op_reqtoken && config.op_restoken)
+	config.op = true;
+
+// Version 1 managed the app with an access token in the address (?token=...); the admin template signs in with a login
+// and the AI apps use the tokens of "MCP access"
+delete config.token;
+delete db.tokens;
 
 // Fixed settings
-CONF.$customtitles = true;
-CONF.version = '1';
-CONF.op_icon = 'ti ti-gamepad';
-CONF.op_path = '/setup/';
-
-// Loads configuration
-LOADCONFIG(db.config);
+CONF.op_icon = 'ti ti-game-board-alt';
 
 // Additional variables
 MAIN.cache = {};
-
-// UI components
-COMPONENTATOR('ui', 'exec,locale,aselected,floatingbox,viewbox,page,input,importer,box,cloudeditorsimple,validate,loading,intranetcss,notify,message,errorhandler,empty,menu,colorpicker,icons,miniform,clipboard,approve,columns,iframepreview,search,searchinput,fileuploader,formdata,filesaver,filereader,ready,datagrid,stats7,directory,datepicker,preview,pagination,intro', true);
-
-// Permissions
-ON('ready', function() {
-	for (var key in Total.plugins) {
-		var item = Total.plugins[key];
-		if (item.permissions)
-			OpenPlatform.permissions.push.apply(OpenPlatform.permissions, item.permissions);
-	}
-});

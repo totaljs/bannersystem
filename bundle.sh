@@ -8,10 +8,10 @@ cp -a ../plugins/ plugins
 cp -a ../public/ public
 cp -a ../views/ views
 
-# cd ..
-total5 --bundle app.bundle
-cp app.bundle ../--bundles--/app.bundle
-
+# The bundler of total5 writes a relative file name next to its own CLI, so the path is absolute
+# and outside the bundled folder
 cd ..
+(cd .bundle && total5 --bundle "$(cd .. && pwd)/--bundles--/app.bundle")
+
 rm -rf .bundle
 echo "DONE"

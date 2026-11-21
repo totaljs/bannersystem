@@ -1,23 +1,16 @@
-// Public HTTP routes: the home page, the upload of campaign pictures and their download.
+// Public HTTP routes: the upload of campaign pictures and their download. The admin interface is served by the admin
+// template (modules/openplatform.js) on every other address.
 
 exports.install = function() {
 
+	// Websites load the banners (/x/) from other domains
 	CORS();
 
 	// A picture of a campaign, 1 MB at most
-	ROUTE('+POST /api/upload/ @upload <1MB', upload);
+	ROUTE('+POST /upload/ @upload <1MB', upload);
 
-	// Index
-	ROUTE('GET /', index);
 	ROUTE('FILE /download/*.*', download);
 };
-
-function index($) {
-	if (CONF.token)
-		$.text(CONF.name);
-	else
-		$.redirect('/setup/');
-}
 
 function upload($) {
 

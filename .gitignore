@@ -1,2 +1,7 @@
 /index.js.map
 /index.js.json
+/node_modules/
+/databases/
+/tmp/
+/package-lock.json
+/index.pid
