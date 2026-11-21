@@ -44,7 +44,7 @@
 			exports.tapi('Tokens|create @showloading ERROR', { name: model.name, expire: model.expire }, function(response) {
 				SETTER('loading/hide', 500);
 				exports.set('token', response.token);
-				EXEC(common.page + '/refresh');
+				EXEC(common.page + '/created', response.token);
 			});
 		};
 
