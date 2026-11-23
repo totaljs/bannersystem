@@ -39,11 +39,13 @@
 					<p>@(Connect your AI app to BannerSystem with this address and one of your tokens. The AI manages the banners and the campaigns with your permissions.)</p>
 					<ui-bind path="?.config" config="template" class="block">
 						<script type="text/html">
+							{{ if value }}
 							{{ if !value.enabled }}
 							<div class="message message-alert m"><i class="ti ti-warning"></i>@(The MCP server is off. Set <b>$mcp : true</b> in the config file and restart the app.)</div>
 							{{ fi }}
 							<div class="step">@(Address:) <code>{{ value.mcp }}</code></div>
 							<div class="step">@(Header:) <code>Authorization: Bearer &lt;@(your token)&gt;</code></div>
+							{{ fi }}
 						</script>
 					</ui-bind>
 
